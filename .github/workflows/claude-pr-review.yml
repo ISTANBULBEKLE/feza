@@ -1,0 +1,40 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Numeric PR/issue id — pulled into env to avoid templating untrusted strings into run/with steps.
+      PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Invokes the local skill at .claude/skills/review-pr/SKILL.md so the
+          # review behavior lives with the repo, not in the workflow.
+          # PR_NUMBER comes from env (set above) — no untrusted-string interpolation.
+          prompt: review-pr $PR_NUMBER
+          claude_args: --max-turns 6

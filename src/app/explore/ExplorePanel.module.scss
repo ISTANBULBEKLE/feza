@@ -1,0 +1,54 @@
+.header {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: clamp(24px, 4vw, 36px);
+    line-height: 1.1;
+  }
+
+  p {
+    color: var(--muted);
+    max-width: 70ch;
+
+    code {
+      font-size: 0.9em;
+      background: var(--surface-2);
+      padding: 0 6px;
+      border-radius: 4px;
+    }
+  }
+}
+
+.back {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.panel {
+  display: grid;
+  gap: 18px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-self: end;
+}
+
+.statusRow {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.error {
+  color: var(--danger);
+}
