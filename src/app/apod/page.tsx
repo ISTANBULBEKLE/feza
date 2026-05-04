@@ -1,4 +1,3 @@
-import Link from "next/link";
 import styles from "./placeholder.module.scss";
 
 export const metadata = {
@@ -24,7 +23,6 @@ export default function ApodPage() {
   return (
     <main>
       <div className={styles.wrap}>
-        <Link href="/" className={styles.back}>← feza</Link>
         <span className={styles.tag}>Epic 2 · live demo target</span>
         <h1 className={styles.title}>Astronomy Picture of the Day</h1>
         <p className={styles.lead}>

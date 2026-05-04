@@ -31,9 +31,6 @@ export default function Home() {
         </Link>
       </section>
 
-      <p className={styles.footer}>
-        Built with Next.js 16 · SCSS modules · Vitest · Claude Code skills.
-      </p>
     </main>
   );
 }
