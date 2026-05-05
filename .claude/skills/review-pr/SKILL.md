@@ -39,6 +39,30 @@ Produce a review with these sections, in this order:
 - New components must include a Vitest test
 - Plain `<img>` is fine for NASA thumbnails (per CLAUDE.md exception)
 
+## PR naming convention
+
+When reviewing, check that the branch name and PR title follow this repo's convention. Flag mismatches as a **Suggestion** (not blocking) — the diff still merits review on its merits.
+
+**Branch names** use `<type>/<short-description>`, kebab-case after the slash:
+
+- `feature/<thing>` — new user-facing functionality (e.g. `feature/apod-page`)
+- `fix/<thing>` — bug fix (e.g. `fix/year-range-url-sync`)
+- `chore/<thing>` — tooling, deps, CI, refactors with no user-visible change (e.g. `chore/upgrade-vitest`)
+- `docs/<thing>` — docs only (e.g. `docs/integration-steps`)
+- `security/<thing>` or `feature/security-improvements` — security-related work that doesn't fit `fix/`
+
+**PR titles** follow Conventional Commits, present-tense imperative, no trailing period, ≤ 70 characters:
+
+- ✅ `feat: add APOD date picker`
+- ✅ `fix: skip URL sync when year range is invalid`
+- ✅ `chore(ci): grant id-token: write for OIDC token exchange`
+- ✅ `docs: add design system token spec`
+- ❌ `WIP`, `tweaks`, `Updated ExplorePanel`, `Fixes for the explore page.`
+
+The title should describe the *change* (what merging this PR does), not the ticket, the file touched, or the work-in-progress state. If the PR bundles unrelated changes, the title should describe the dominant one and the body should list the rest.
+
+If the branch name and title disagree (e.g. branch `fix/...` but title `feat: ...`), call out the mismatch — usually one of them is misleading the reviewer about the actual blast radius.
+
 ## Tone
 
 Be specific. Cite paths and line numbers. Don't write generic "consider adding tests" — point at the file that needs them. Skip praise; the value is the diff feedback.
