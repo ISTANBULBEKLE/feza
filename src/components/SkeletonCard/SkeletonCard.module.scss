@@ -1,0 +1,67 @@
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.media {
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    var(--border) 50%,
+    var(--surface-2) 100%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.body {
+  padding: 14px 16px 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    var(--border) 50%,
+    var(--surface-2) 100%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.title {
+  width: 80%;
+  height: 14px;
+}
+
+.meta {
+  width: 40%;
+  height: 10px;
+}
+
+.desc {
+  width: 100%;
+  height: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media,
+  .line {
+    animation: none;
+  }
+}

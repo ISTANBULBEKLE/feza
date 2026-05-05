@@ -29,4 +29,12 @@ describe("PhotoCard", () => {
     render(<PhotoCard item={noThumb} />);
     expect(screen.getByText("IMAGE")).toBeInTheDocument();
   });
+
+  it("links to the NASA detail page in a new tab", () => {
+    render(<PhotoCard item={sample} />);
+    const link = screen.getByRole("link", { name: /Curiosity self-portrait/ });
+    expect(link).toHaveAttribute("href", "https://images.nasa.gov/details/PIA12345");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+  });
 });

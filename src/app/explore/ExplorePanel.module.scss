@@ -28,7 +28,16 @@
 
 .panel {
   display: grid;
-  gap: 18px;
+  gap: 14px;
+}
+
+.searchRow {
+  display: grid;
+  gap: 12px;
+}
+
+.chips {
+  margin-top: -2px;
 }
 
 .controls {
@@ -47,8 +56,15 @@
 .statusRow {
   font-size: 13px;
   color: var(--muted);
+  min-height: 18px;
 }
 
 .error {
   color: var(--danger);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
 }

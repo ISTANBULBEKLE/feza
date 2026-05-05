@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.scss";
+import styles from "./layout.module.scss";
+import { Header } from "@/components/Header/Header";
+import { Footer } from "@/components/Footer/Footer";
 
 export const metadata: Metadata = {
   title: "feza · NASA explorer",
@@ -12,7 +15,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <div className={styles.shell}>
+          <Header />
+          <div className={styles.content}>{children}</div>
+          <Footer />
+        </div>
+      </body>
     </html>
   );
 }

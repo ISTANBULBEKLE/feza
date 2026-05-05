@@ -1,6 +1,10 @@
 export const IMAGE_LIBRARY_BASE = "https://images-api.nasa.gov";
 export const APOD_BASE = "https://api.nasa.gov/planetary/apod";
 
+/** Public NASA detail page for an asset (clickable from a PhotoCard). */
+export const nasaDetailUrl = (nasaId: string): string =>
+  `https://images.nasa.gov/details/${encodeURIComponent(nasaId)}`;
+
 export const TOPIC_PRESETS = [
   { label: "Mars Rover", value: "mars rover" },
   { label: "Apollo Missions", value: "apollo" },
