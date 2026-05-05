@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./ExplorePanel.module.scss";
 import { Select } from "@/components/Select/Select";
@@ -18,6 +18,7 @@ import {
 import { useNasaSearch } from "@/hooks/useNasaSearch";
 
 const DEFAULT_TOPIC = TOPIC_PRESETS[0].value;
+const SKELETON_COUNT = 8;
 
 export interface ExplorePanelInitial {
   q?: string;
@@ -30,11 +31,21 @@ export interface ExplorePanelProps {
   initial?: ExplorePanelInitial;
 }
 
-const SKELETON_COUNT = 8;
+function normalizeMediaType(v: string | undefined): MediaType | "" {
+  if (v === "image" || v === "video" || v === "audio") return v;
+  return "image";
+}
 
-function isValidMedia(v: string | undefined): v is MediaType | "" {
-  if (!v) return true;
-  return v === "image" || v === "video" || v === "audio";
+function filterYearOptions(
+  options: typeof YEAR_OPTIONS,
+  { min, max }: { min?: string; max?: string },
+) {
+  return options.filter((o) => {
+    const year = Number(o.value);
+    if (min && year < Number(min)) return false;
+    if (max && year > Number(max)) return false;
+    return true;
+  });
 }
 
 export function ExplorePanel({ initial }: ExplorePanelProps = {}) {
@@ -43,7 +54,7 @@ export function ExplorePanel({ initial }: ExplorePanelProps = {}) {
 
   const [topic, setTopic] = useState<string>(initial?.q ?? DEFAULT_TOPIC);
   const [mediaType, setMediaType] = useState<MediaType | "">(
-    isValidMedia(initial?.mediaType) ? ((initial?.mediaType as MediaType | "") || "image") : "image",
+    normalizeMediaType(initial?.mediaType),
   );
   const [yearStart, setYearStart] = useState<string>(initial?.yearStart ?? "");
   const [yearEnd, setYearEnd] = useState<string>(initial?.yearEnd ?? "");
@@ -65,44 +76,62 @@ export function ExplorePanel({ initial }: ExplorePanelProps = {}) {
     [topic, mediaType, yearStart, yearEnd],
   );
 
-  // Don't fire upstream search when year range is invalid.
   const safeFilters = yearError ? { ...filters, q: "" } : filters;
   const { items, totalHits, loading, error } = useNasaSearch(safeFilters);
 
-  // ── URL sync (debounced via the same effect cadence as state changes).
-  // Keep pathname stable; only mutate the search string.
-  const firstSyncRef = useRef(true);
   useEffect(() => {
     if (!router || !pathname) return;
+    if (yearError) return;
+
     const params = new URLSearchParams();
     if (topic && topic !== DEFAULT_TOPIC) params.set("q", topic);
     if (mediaType && mediaType !== "image") params.set("mediaType", mediaType);
     if (yearStart) params.set("yearStart", yearStart);
     if (yearEnd) params.set("yearEnd", yearEnd);
+
     const qs = params.toString();
     const next = qs ? `${pathname}?${qs}` : pathname;
-    // Skip pushing on first render if URL already matches initial state
-    if (firstSyncRef.current) {
-      firstSyncRef.current = false;
-      return;
-    }
-    router.replace(next, { scroll: false });
-  }, [topic, mediaType, yearStart, yearEnd, router, pathname]);
+    const current = window.location.pathname + window.location.search;
+    if (current === next) return;
 
-  const activePreset = TOPIC_PRESETS.find((p) => p.value === topic.trim().toLowerCase())?.value;
+    router.replace(next, { scroll: false });
+  }, [topic, mediaType, yearStart, yearEnd, yearError, router, pathname]);
+
+  const activePreset = TOPIC_PRESETS.find(
+    (p) => p.value === topic.trim().toLowerCase(),
+  )?.value;
 
   const yearStartOptions = useMemo(
-    () =>
-      YEAR_OPTIONS.filter((o) => !yearEnd || Number(o.value) <= Number(yearEnd)),
+    () => filterYearOptions(YEAR_OPTIONS, { max: yearEnd }),
     [yearEnd],
   );
   const yearEndOptions = useMemo(
-    () =>
-      YEAR_OPTIONS.filter((o) => !yearStart || Number(o.value) >= Number(yearStart)),
+    () => filterYearOptions(YEAR_OPTIONS, { min: yearStart }),
     [yearStart],
   );
 
-  const showSkeletons = loading && items.length === 0 && !!topic.trim();
+  const hasTopic = !!topic.trim();
+  const showSkeletons = loading && items.length === 0 && hasTopic;
+
+  const statusMessage = (() => {
+    if (yearError) return { type: "error", text: yearError } as const;
+    if (!hasTopic)
+      return {
+        type: "info",
+        text: "Type a topic or pick a preset to search.",
+      } as const;
+    if (loading) return { type: "info", text: "Searching…" } as const;
+    if (error) return { type: "error", text: error } as const;
+    return {
+      type: "info",
+      text: `${items.length} of ${totalHits.toLocaleString()} results`,
+    } as const;
+  })();
+
+  const emptyMessage =
+    !hasTopic || loading
+      ? ""
+      : "No results — try a different topic or filter.";
 
   return (
     <section className={styles.panel} aria-busy={loading}>
@@ -166,19 +195,11 @@ export function ExplorePanel({ initial }: ExplorePanelProps = {}) {
       </div>
 
       <div className={styles.statusRow} aria-live="polite">
-        {yearError ? (
-          <span className={styles.error}>{yearError}</span>
-        ) : !topic.trim() ? (
-          <span>Type a topic or pick a preset to search.</span>
-        ) : loading ? (
-          <span>Searching…</span>
-        ) : error ? (
-          <span className={styles.error}>{error}</span>
-        ) : (
-          <span>
-            {items.length} of {totalHits.toLocaleString()} results
-          </span>
-        )}
+        <span
+          className={statusMessage.type === "error" ? styles.error : undefined}
+        >
+          {statusMessage.text}
+        </span>
       </div>
 
       {showSkeletons ? (
@@ -186,16 +207,7 @@ export function ExplorePanel({ initial }: ExplorePanelProps = {}) {
           <SkeletonCard count={SKELETON_COUNT} />
         </div>
       ) : (
-        <PhotoGrid
-          items={items}
-          emptyMessage={
-            !topic.trim()
-              ? ""
-              : loading
-                ? ""
-                : "No results — try a different topic or filter."
-          }
-        />
+        <PhotoGrid items={items} emptyMessage={emptyMessage} />
       )}
     </section>
   );
