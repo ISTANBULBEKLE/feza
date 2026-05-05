@@ -33,7 +33,7 @@ jobs:
       - name: Run Claude review
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Invokes the local skill at .claude/skills/review-pr/SKILL.md so the
           # review behavior lives with the repo, not in the workflow.
           # PR_NUMBER comes from env (set above) — no untrusted-string interpolation.
