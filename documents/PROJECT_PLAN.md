@@ -1,189 +1,96 @@
 # feza — Live Demo Build Plan
 
-> Canonical, version-controlled plan for the **feza** project — a Next.js v16 demo app built to showcase Claude Code, CLAUDE.md, Skills, MCP, and Claude Desktop in everyday dev work.
+The canonical plan for the **feza** demo app — a Next.js 16 App Router project built around the talk *"Your AI Dev Partner in the Terminal: Claude Code, CLAUDE.md, Skills, Cowork, MCP for everyday dev work."*
 
-## Context
+The app is intentionally simple — the product is the **workflow** it showcases:
 
-**Goal:** Build `feza`, a small Next.js v16 App Router demo app, as the centerpiece of a live presentation titled **"Your AI Dev Partner in the Terminal: Claude Code, CLAUDE.md, Skills, Cowork, MCP for everyday dev work."**
-
-The app itself is intentionally simple — the *real* product is the workflow it showcases:
-- Generating, testing, and reviewing code with Claude Code (terminal) and Claude Desktop
-- CLAUDE.md as durable project memory
+- Claude Code in the terminal + Claude Desktop
+- `CLAUDE.md` as durable project memory
 - `.claude/skills/` as reusable, team-shared workflows
-- MCP servers wiring Claude into Figma, GitHub, and Canva
+- MCP servers wiring Claude into Figma, GitHub, Canva
 - GitHub Actions invoking Claude for automated PR review
+- SonarCloud + Chromatic for CI quality gates
 
-**Two user journeys (Epics):**
-- **Epic 1 — `/explore` (pre-built before the talk):** NASA Image Library search. Inputs: topic preset select, media type select, year range select. Output: card grid of NASA images.
-- **Epic 2 — `/apod` (live-coded on stage):** Astronomy Picture of the Day browser. Inputs: date picker, "count" slider for random picks. Output: card list with title, date, image/video, explanation.
+## Two epics
 
-**Live-demo arc (the story for the audience):**
-1. `cd feza && claude` → CLAUDE.md auto-loads, Claude understands the codebase
-2. Open Figma in Claude Desktop via MCP → pull Epic 2 screen → ask Claude Code to scaffold from it
-3. Build the page using `/feza-component` and `/feza-route` skills → green tests via `make test`
-4. Push branch → GitHub Action (`anthropics/claude-code-action@v1`) auto-reviews the PR
-5. Export a hero asset from Canva (manual, MCP not yet official) → drop into `public/`, ship
+| Epic | Route | State | Why |
+|---|---|---|---|
+| **Epic 1** | `/explore` | Built ✅ | NASA Image Library search. Shows "what Claude built before the talk." |
+| **Epic 2** | `/apod` | Placeholder | Live-coded on stage. APOD browser. Symmetric to Epic 1 — perfect "I just learned this pattern, watch me apply it." |
 
-## Decisions locked with the user
+## Live-demo arc (the story)
+
+1. `cd feza && claude` → CLAUDE.md auto-loads, Claude understands the codebase.
+2. Open Figma in Claude Desktop via MCP → pull Epic 2 screen → ask Claude Code to scaffold from it.
+3. Build the page using `/feza-route` and `/feza-component` skills → green tests via `make test`.
+4. Add a Storybook story with `/feza-story` → Chromatic baselines the diff.
+5. Push branch → GitHub Actions run lint / SonarCloud / Chromatic / Claude PR review in parallel.
+6. Export a hero asset from Canva (manual; MCP not yet official) → `public/`, ship.
+
+## Locked decisions
 
 | Question | Decision |
 |---|---|
-| Epic 1 data source | **NASA Image Library** (`https://images-api.nasa.gov/search`, no API key, fully live) — Mars Rover Photos API is currently degraded |
-| Epic 2 user journey | **APOD browser** (verified-live, symmetric to Epic 1 — perfect "I just learned this pattern, watch me apply it" demo) |
-| Styling | **SCSS modules only** — no Tailwind |
-| Folder layout | `src/components/`, `src/hooks/`, `src/lib/`, `src/helpers/`, `src/constants/` as **siblings of `src/app/`** (idiomatic Next.js) |
+| Epic 1 data source | NASA Image Library (`https://images-api.nasa.gov/search`, no key) |
+| Epic 2 user journey | APOD browser — date picker OR count slider |
+| Styling | SCSS modules only |
+| Folder layout | `src/components|hooks|lib|helpers|constants/` are siblings of `src/app/` |
+| Stories | Co-located: `<Name>.stories.tsx` next to `<Name>.tsx` |
+| CI gates | lint + sonarcloud + chromatic + claude-pr-review (see `documents/SETUP.md`) |
 
-## Tech stack & gaps identified
-
-| Tool | Status | Notes |
-|---|---|---|
-| Node 22.15.1 | OK | Next.js 16 needs >=20.9 |
-| npm 10.9.2 | OK | |
-| git 2.50.1 | OK | Repo not yet initialized — `make init` will do it |
-| gh 2.81.0 | OK | For PR demo |
-| Next.js v16 | will install | Turbopack default, `params` async, `middleware.ts` -> `proxy.ts` |
-| sass | will install (`-D sass`) | Built-in Next.js support, no extra config |
-| Vitest + @testing-library | will install | Pairs cleanly with App Router; faster than Jest for live demo |
-| NASA API key | needs registration | APOD must use a real key (not `DEMO_KEY`). Free, instant: https://api.nasa.gov/. Image Library API needs no key. |
-| Figma desktop + Dev Mode MCP | user must enable | Required for Figma -> code handoff demo |
-| GitHub `ANTHROPIC_API_KEY` secret | needs setup | Required for `anthropics/claude-code-action@v1` |
-| Canva MCP | not officially confirmed in registry as of 2026-04-30 | Plan a manual Canva export step in the demo |
-
-## Final repo layout
+## Repo layout (target)
 
 ```
 feza/
-├── .claude/
-│   ├── skills/
-│   │   ├── feza-component/SKILL.md        # scaffold tsx + .module.scss + .test.tsx
-│   │   ├── feza-route/SKILL.md            # scaffold app/<seg>/page.tsx + route handler
-│   │   ├── nasa-fetch/SKILL.md            # wrap a NASA endpoint as a Route Handler
-│   │   └── review-pr/SKILL.md             # local PR review (mirrors GitHub Action)
-│   └── settings.json                      # project-level allowed tools (gh, npm, make)
-├── .github/
-│   └── workflows/
-│       └── claude-pr-review.yml           # anthropics/claude-code-action@v1 on PRs
+├── .claude/skills/             feza-component, feza-route, feza-story,
+│                                nasa-fetch, eslint-check, sonar-scan, review-pr
+├── .github/workflows/          lint, sonarcloud, chromatic, claude-pr-review
+├── .storybook/                 main.ts + preview.ts (nextjs-vite framework)
+├── documents/                  PROJECT_PLAN, EPICS, FEZA_PLAN, INTEGRATION_STEPS_PLAN, SETUP, DESIGN_SYSTEM_TOKEN
 ├── public/
 ├── src/
-│   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx                       # landing — links to /explore and /apod
-│   │   ├── globals.scss
-│   │   ├── explore/                       # EPIC 1 (pre-built)
-│   │   ├── apod/                          # EPIC 2 (live-coded — placeholder stub committed)
-│   │   └── api/
-│   │       ├── nasa-search/route.ts
-│   │       └── apod/route.ts
-│   ├── components/
-│   │   ├── Select/             Select.tsx + .module.scss + .test.tsx
-│   │   ├── Button/             Button.tsx + .module.scss + .test.tsx
-│   │   ├── DatePicker/         (live-coded on stage)
-│   │   ├── PhotoCard/          PhotoCard.tsx + .module.scss + .test.tsx
-│   │   └── PhotoGrid/          PhotoGrid.tsx + .module.scss + .test.tsx
-│   ├── hooks/                  useDebounce.ts, useNasaSearch.ts
-│   ├── helpers/                formatDate.ts, classNames.ts
-│   ├── lib/                    nasa.ts, env.ts
-│   ├── constants/              nasa.ts, routes.ts
-│   └── proxy.ts                # Next.js 16 (was middleware.ts) — request logging
-├── .env.local                  # NASA_API_KEY=... (gitignored)
-├── .env.example
-├── .gitignore
-├── CLAUDE.md
-├── EPICS.md
-├── FEZA_PLAN.md
-├── INTEGRATION_STEPS_PLAN.md
-├── Makefile
-├── PROJECT_PLAN.md             # this file
-├── README.md
-├── START.md
-├── next.config.ts
-├── package.json
-├── tsconfig.json
-├── vitest.config.ts
-└── vitest.setup.ts
+│   ├── app/                    routes only (page.tsx, layout.tsx, route.ts, proxy.ts, api/*/route.ts)
+│   ├── components/<Name>/      .tsx + .module.scss + .test.tsx + .stories.tsx
+│   ├── hooks/                  useDebounce, useNasaSearch
+│   ├── helpers/                pure functions
+│   ├── lib/                    nasa.ts, env.ts (server-only)
+│   └── constants/              static config
+├── CLAUDE.md, README.md, START.md
+├── Makefile, package.json, sonar-project.properties
+└── eslint.config.mjs, vitest.config.ts, vitest.setup.ts
 ```
 
 ## Build sequence
 
 ### Phase 0 — Scaffold
-- 0.0 Write `feza/PROJECT_PLAN.md` (this file)
-- 0.1 `npx create-next-app@latest . --ts --eslint --app --src-dir --import-alias "@/*" --use-npm --turbopack --skip-install --yes`
-- 0.2 `npm install` then `-D sass vitest @vitejs/plugin-react @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom`
-- 0.3 `git init && git branch -m main && git add -A && git commit -m "chore: scaffold Next.js 16 app"`
-- 0.4 Create sibling dirs `src/{components,hooks,helpers,lib,constants}`
-- 0.5 Move `src/middleware.ts` -> `src/proxy.ts` (rename export to `proxy`)
-- 0.6 Drop in `vitest.config.ts`, `vitest.setup.ts`
-- 0.7 Write Makefile, .env.example, .gitignore additions, CLAUDE.md, README.md, START.md, EPICS.md, FEZA_PLAN.md, INTEGRATION_STEPS_PLAN.md
-- 0.8 Sanity: `make dev` -> http://localhost:3000
+`create-next-app` (TypeScript + ESLint + App Router + src dir + Turbopack), `npm install`, init git, create sibling dirs, rename `middleware.ts` → `proxy.ts`, drop in vitest config + Makefile + docs. Sanity-check with `make dev`.
 
-### Phase 1 — Epic 1 `/explore` (pre-built) — NASA Image Library
+### Phase 1 — Epic 1 `/explore` (built)
+NASA Image Library wrapper in `src/lib/nasa.ts`, Route Handler in `src/app/api/nasa-search/route.ts`, atoms (`Select`, `Button`), molecules (`PhotoCard`, `PhotoGrid`), debounced `useNasaSearch` hook, server `/explore` page + client `<ExplorePanel>`, polish (empty/error/loading), Vitest unit tests, Storybook seed stories. Tickets in `documents/EPICS.md`.
 
-- **E1-T1** — Constants & types in `src/constants/nasa.ts` and `src/lib/nasa.ts`
-- **E1-T2** — `searchImages({ q, mediaType, yearStart, yearEnd })` in `src/lib/nasa.ts`
-- **E1-T3** — `src/app/api/nasa-search/route.ts` Route Handler
-- **E1-T4** — `Select`, `Button` atoms with `.module.scss` + tests
-- **E1-T5** — `PhotoCard`, `PhotoGrid` molecules with `.module.scss` + tests
-- **E1-T6** — `useNasaSearch` client hook (debounced)
-- **E1-T7** — `src/app/explore/page.tsx` (server) + `<ExplorePanel>` (client)
-- **E1-T8** — Vitest unit tests
-- **E1-T9** — Polish: empty / error / no-results states, accessibility
-
-### Phase 2 — Epic 2 `/apod` (LIVE-CODED on stage) — APOD browser
-
-Pre-stage: only commit a placeholder `src/app/apod/page.tsx` so the route resolves.
-
-Live-demo script:
-- **E2-T1** — Open Figma in Claude Desktop, "get selection" via Figma MCP
-- **E2-T2** — `/feza-route apod` skill -> scaffold page + route handler
-- **E2-T3** — Append `getApod({ date?, count? })` to `src/lib/nasa.ts`
-- **E2-T4** — `src/app/api/apod/route.ts` (uses `NASA_API_KEY`, never leaks to client)
-- **E2-T5** — `/feza-component DatePicker` skill -> component + .module.scss + test
-- **E2-T6** — Wire page (date OR count, mutually exclusive)
-- **E2-T7** — Handle `media_type === 'video'`
-- **E2-T8** — Tests
-- **E2-T9** — Push branch, open PR, watch Claude review on GitHub
+### Phase 2 — Epic 2 `/apod` (live)
+Pre-stage: only commit a placeholder `src/app/apod/page.tsx`. On stage, scaffold via skills, append `getApod({ date?, count? })` to `nasa.ts`, build `<DatePicker>`, handle `media_type === "video"`, push branch, watch all four CI workflows post their status checks.
 
 ### Phase 3 — Skills + CLAUDE.md + MCP
+Seven skills under `.claude/skills/`: scaffolders (`feza-component`, `feza-route`, `feza-story`, `nasa-fetch`) and quality skills (`eslint-check`, `sonar-scan`, `review-pr`). CLAUDE.md keeps project memory under ~100 lines. `claude mcp add` wires Figma Dev Mode, GitHub, and Playwright (commands in `documents/INTEGRATION_STEPS_PLAN.md`).
 
-- CLAUDE.md (<=200 lines): project intent, conventions, commands, do/don't
-- `.claude/skills/feza-component/SKILL.md` — scaffolds three-file component
-- `.claude/skills/feza-route/SKILL.md` — scaffolds page + route handler
-- `.claude/skills/nasa-fetch/SKILL.md` — wraps a NASA endpoint
-- `.claude/skills/review-pr/SKILL.md` — `disable-model-invocation: true`, `allowed-tools: Bash(gh *)`
-- `.claude/settings.json` — pre-approves `Bash(make *)`, `Bash(npm *)`, `Bash(gh *)`
-- `claude mcp add` for GitHub, Figma Dev Mode, Playwright (commands in INTEGRATION_STEPS_PLAN.md)
+### Phase 4 — CI gates
+Four GitHub workflows on every PR:
+- `lint.yml` — `lint` + `typecheck` + `test` jobs.
+- `sonarcloud.yml` — SonarCloud analysis (project key `ISTANBULBEKLE_feza`).
+- `chromatic.yml` — Storybook visual regression via `chromaui/action` (commit-SHA pinned).
+- `claude-pr-review.yml` — Claude PR review using the local `/review-pr` skill.
 
-### Phase 4 — GitHub PR review automation
+One-time setup (secrets, project import, app installs) lives in `documents/SETUP.md`.
 
-- `.github/workflows/claude-pr-review.yml` — `anthropics/claude-code-action@v1` on PRs and `@claude` mentions, invokes `review-pr` skill
-- Repo secret `ANTHROPIC_API_KEY` set via `gh secret set`
-- Optional: `claude /install-github-app`
+### Phase 5 — Figma & Canva
+**Figma:** both epic screens in a shared file; Dev Mode MCP exposes selection / code / variables. **Canva:** manual export PNG → `public/hero.png`. Talking point: "manual today, automated tomorrow — same workflow."
 
-### Phase 5 — Figma & Canva integrations
+## References
 
-- **Figma:** Both Epic screens in a shared file; Dev Mode MCP exposes selection / code / image / variables. Demo: select frame -> ask Claude Desktop to scaffold layout into `src/app/apod/page.tsx`.
-- **Canva:** Manual export PNG -> `public/hero.png`. Talking point: "manual today, automated tomorrow — same workflow."
-
-## Verification
-
-After Phase 0:
-- `make dev` -> http://localhost:3000 shows landing page with two link cards
-- `make test` -> green
-- `make build` -> succeeds with Turbopack
-
-After Phase 1:
-- `/explore` filters work; cards render; loading/empty/error reachable
-- All Vitest unit tests green
-
-After Phase 2 (live):
-- `/apod` works with date picker OR count slider
-- PR opened on GitHub triggers Claude review within ~2 min
-
-## Key references
-
-- Next.js 16 release notes: https://nextjs.org/blog/next-16
-- NASA Image Library: https://images-api.nasa.gov/search?q=mars+rover (no key)
-- NASA APOD: https://api.nasa.gov/planetary/apod (free key required)
-- Claude Code skills: https://code.claude.com/docs/en/custom-skills.md
+- Next.js 16 release notes: <https://nextjs.org/blog/next-16>
+- NASA Image Library: <https://images-api.nasa.gov/search>
+- NASA APOD: <https://api.nasa.gov/planetary/apod>
+- Claude Code skills: <https://code.claude.com/docs/en/custom-skills.md>
 - Claude Code GitHub Action: `anthropics/claude-code-action@v1`
-- Figma Dev Mode MCP: enabled inside Figma desktop
+- SonarCloud project: <https://sonarcloud.io/summary/new_code?id=ISTANBULBEKLE_feza>
