@@ -77,6 +77,14 @@ When asked to build Epic 2 on stage:
 3. Reuse `<PhotoCard>` and `<PhotoGrid>` from `src/components/`.
 4. Run `make test` after each ticket — green tests are the demo's punctuation.
 
+### Quality pass before each commit
+
+1. `/eslint-check` — triaged lint report; CLAUDE.md violations flagged separately from ESLint findings.
+2. `/feza-story <Name>` — add a Storybook story for any new component you scaffold (`<Name>.stories.tsx` next to the existing `.tsx` + `.test.tsx`).
+3. `/sonar-scan` — run before merging the demo branch back. Quality-gate failures during the live demo are entertainment, not blockers.
+
+See `SETUP.md` for the one-time SonarCloud + Chromatic wiring.
+
 ## References
 
 - `PROJECT_PLAN.md` — full plan
