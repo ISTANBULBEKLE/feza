@@ -27,7 +27,8 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Tests with coverage
         run: npx vitest run --coverage --coverage.reporter=lcov --coverage.reporter=text-summary
-      - uses: SonarSource/sonarcloud-github-action@master
+      - uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
