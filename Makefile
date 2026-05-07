@@ -11,7 +11,7 @@
 SHELL := /bin/bash
 PORT  ?= 3000
 
-.PHONY: help dev stop install build test test-watch lint clean init pr-review
+.PHONY: help dev stop install build test test-watch lint clean init pr-review storybook storybook-build lint-fix lint-check coverage sonar
 
 help: ## list targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -48,5 +48,24 @@ init: ## fresh demo: clean + install + dev
 pr-review: ## local invocation of the review-pr skill (PR=123 make pr-review)
 	@if [ -z "$$PR" ]; then echo "usage: PR=<number> make pr-review"; exit 1; fi
 	@claude /review-pr $$PR
+
+storybook: ## [demo] run Storybook on :6006
+	@npm run storybook
+
+storybook-build: ## headless Storybook build (storybook-static/)
+	@npm run build-storybook
+
+lint-fix: ## [quality] apply ESLint auto-fixes
+	@npm run lint:fix
+
+lint-check: ## [quality] triaged lint via /eslint-check skill
+	@claude /eslint-check
+
+coverage: ## generate LCOV coverage report (consumed by Sonar)
+	@npm run test:coverage
+
+sonar: ## [quality] full SonarCloud pass via /sonar-scan skill
+	@if [ -z "$$SONAR_TOKEN" ]; then echo "SONAR_TOKEN unset — see SETUP.md"; exit 1; fi
+	@claude /sonar-scan
 
 .DEFAULT_GOAL := help

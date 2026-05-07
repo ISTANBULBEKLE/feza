@@ -9,7 +9,6 @@ export function proxy(request: NextRequest) {
   if (process.env.NODE_ENV !== "production") {
     const { method } = request;
     const { pathname, search } = request.nextUrl;
-    // eslint-disable-next-line no-console
     console.log(`[proxy] ${method} ${pathname}${search}`);
   }
   return NextResponse.next();
