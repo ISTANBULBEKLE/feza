@@ -4,21 +4,22 @@
 
 ## What feza is
 
-A small Next.js 16 App Router app built as the demo for the talk *"Your AI Dev Partner in the Terminal: Claude Code, CLAUDE.md, Skills, Cowork, MCP for everyday dev work."* The app's value is the **workflow it showcases**, not its features.
+A small Next.js 16 App Router app — the demo for the talk *"Your AI Dev Partner in the Terminal: Claude Code, CLAUDE.md, Skills, Cowork, MCP for everyday dev work."* The value is the **workflow it showcases**, not the features.
 
-- **Epic 1 — `/explore`** (already built): NASA Image Library search.
-- **Epic 2 — `/apod`** (live-coded on stage): APOD browser. The page is a placeholder until then.
+- **Epic 1 — `/explore`** (built): NASA Image Library search.
+- **Epic 2 — `/apod`** (live-coded on stage): APOD browser. Page is a placeholder until then.
 
-Full design lives in `PROJECT_PLAN.md`. Tickets live in `EPICS.md`.
+Full design lives in `documents/PROJECT_PLAN.md`. Tickets in `documents/EPICS.md`.
 
 ## Stack
 
-- Next.js **16** (App Router, **Turbopack default**, **`params`/`searchParams` are async**)
-- React 19.2
-- TypeScript 5
-- **SCSS modules only** — no Tailwind, no styled-components
+- Next.js **16** App Router — Turbopack default, **`params` and `searchParams` are async**, `proxy.ts` replaces `middleware.ts`. Treat your training data as out of date here.
+- React 19.2, TypeScript 5
+- **SCSS modules only** — no Tailwind, no styled-components, no global CSS beyond `src/app/globals.scss`
 - Vitest + Testing Library + jsdom
-- ESLint (flat config)
+- ESLint flat config
+- Storybook 10 (`@storybook/nextjs-vite`) for component stories
+- SonarCloud + Chromatic for CI quality + visual regression
 - Node ≥ 20.9 (project uses 22.x)
 
 ## Folder conventions
@@ -26,7 +27,7 @@ Full design lives in `PROJECT_PLAN.md`. Tickets live in `EPICS.md`.
 ```
 src/
   app/                 routes only (page.tsx, layout.tsx, loading.tsx, route.ts, proxy.ts)
-  components/<Name>/   <Name>.tsx + <Name>.module.scss + <Name>.test.tsx (3 files per component)
+  components/<Name>/   <Name>.tsx + <Name>.module.scss + <Name>.test.tsx + <Name>.stories.tsx
   hooks/               useThing.ts (each starts with "use client" if it uses React hooks)
   helpers/             pure functions, no React
   lib/                 server-aware modules (NASA wrappers, env accessors)
@@ -40,16 +41,24 @@ src/
 | Command | What it does |
 |---|---|
 | `make dev` | Dev server on :3000 (Turbopack) |
-| `make stop` | Kill process on :3000 |
-| `make build` | Production build |
-| `make test` | Vitest one-shot run |
-| `make test-watch` | Vitest watch mode |
+| `make build` | Production build — always run before claiming a feature is done |
+| `make test` | Vitest one-shot |
 | `make lint` | ESLint |
-| `make clean` | Remove `.next` + `node_modules` |
-| `make init` | Fresh demo: clean + install + dev |
-| `PR=123 make pr-review` | Local invocation of `/review-pr` skill |
+| `make storybook` | Storybook on :6006 |
+| `make help` | List all targets (storybook-build, lint-fix, lint-check, coverage, sonar, pr-review, …) |
 
 Always run `make build` before claiming a feature is done — Turbopack catches type errors that `npm run dev` happily ignores.
+
+## CI gates
+
+Four workflows in `.github/workflows/`. One-time setup in `documents/SETUP.md`.
+
+- `lint.yml` — `lint`, `typecheck`, `test` jobs on every PR + push to main.
+- `sonarcloud.yml` — SonarCloud analysis. Project key `ISTANBULBEKLE_feza`. Config in `sonar-project.properties` at repo root.
+- `chromatic.yml` — Storybook visual regression via `chromaui/action` (pinned to commit SHA).
+- `claude-pr-review.yml` — Claude PR review using the local `/review-pr` skill.
+
+Skills live in `.claude/skills/`. Claude Code auto-discovers them — the README has the human-facing list.
 
 ## Do
 
@@ -58,8 +67,8 @@ Always run `make build` before claiming a feature is done — Turbopack catches 
 - **Keep `proxy.ts` in `src/`** — `middleware.ts` is deprecated in v16. Export a function named `proxy`.
 - **Read `NASA_API_KEY` only on the server** via `nasaApiKey()` in `src/lib/env.ts`. Never embed it in a client bundle.
 - **Use the Route Handlers in `src/app/api/*`** as the only path between the browser and NASA — clients should never hit `images-api.nasa.gov` directly.
-- **One folder per component**, three files (tsx + .module.scss + .test.tsx). Use the `/feza-component` skill to scaffold.
-- **Plain `<img>` for NASA thumbnails.** Their CDN serves rotating S3 URLs, and configuring `next/image` `remotePatterns` for `*.nasa.gov` adds noise to the live demo. (We disable `@next/next/no-img-element` per-line where needed.)
+- **Co-locate one folder per component** with `.tsx` + `.module.scss` + `.test.tsx` (+ `.stories.tsx` when there's something visual to baseline).
+- **Plain `<img>` for NASA thumbnails.** Their CDN serves rotating S3 URLs, and configuring `next/image` `remotePatterns` for `*.nasa.gov` adds noise to the live demo. Disable `@next/next/no-img-element` per-line where needed.
 
 ## Don't
 
@@ -72,23 +81,22 @@ Always run `make build` before claiming a feature is done — Turbopack catches 
 ## Live-demo etiquette
 
 When asked to build Epic 2 on stage:
-1. Use `/feza-route apod` to scaffold page + route handler.
-2. Use `/feza-component DatePicker` for the new component.
+1. Scaffold the page + paired API route handler.
+2. Scaffold any new component (3-file pattern + a Storybook story).
 3. Reuse `<PhotoCard>` and `<PhotoGrid>` from `src/components/`.
 4. Run `make test` after each ticket — green tests are the demo's punctuation.
 
 ### Quality pass before each commit
 
-1. `/eslint-check` — triaged lint report; CLAUDE.md violations flagged separately from ESLint findings.
-2. `/feza-story <Name>` — add a Storybook story for any new component you scaffold (`<Name>.stories.tsx` next to the existing `.tsx` + `.test.tsx`).
-3. `/sonar-scan` — run before merging the demo branch back. Quality-gate failures during the live demo are entertainment, not blockers.
-
-See `SETUP.md` for the one-time SonarCloud + Chromatic wiring.
+1. `/eslint-check` — triaged lint report; CLAUDE.md violations called out separately from ESLint findings.
+2. `/sonar-scan` — run before merging the demo branch back. Quality-gate failures during the live demo are entertainment, not blockers.
 
 ## References
 
-- `PROJECT_PLAN.md` — full plan
-- `EPICS.md` — ticket-by-ticket breakdown
-- `INTEGRATION_STEPS_PLAN.md` — Figma + GitHub + Canva playbook
-- `FEZA_PLAN.md` — business / talk-narrative plan
+- `documents/PROJECT_PLAN.md` — full plan
+- `documents/EPICS.md` — ticket-by-ticket breakdown
+- `documents/INTEGRATION_STEPS_PLAN.md` — Figma + GitHub + Canva playbook
+- `documents/FEZA_PLAN.md` — talk narrative
+- `documents/SETUP.md` — one-time SonarCloud + Chromatic wiring
+- `documents/DESIGN_SYSTEM_TOKEN.md` — design-system token reference
 - `START.md` — 60-second how-to-run
