@@ -65,7 +65,7 @@ coverage: ## generate LCOV coverage report (consumed by Sonar)
 	@npm run test:coverage
 
 sonar: ## [quality] full SonarCloud pass via /sonar-scan skill
-	@if [ -z "$$SONAR_TOKEN" ]; then echo "SONAR_TOKEN unset — see SETUP.md"; exit 1; fi
+	@if [ -z "$$SONAR_TOKEN" ]; then echo "SONAR_TOKEN unset — see documents/SETUP.md"; exit 1; fi
 	@claude /sonar-scan
 
 .DEFAULT_GOAL := help
