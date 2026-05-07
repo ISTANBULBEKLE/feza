@@ -29,10 +29,7 @@ export function useNasaSearch(filters: NasaSearchFilters): NasaSearchState {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!debounced.q.trim()) {
-      setState({ items: [], totalHits: 0, loading: false });
-      return;
-    }
+    if (!debounced.q.trim()) return;
 
     abortRef.current?.abort();
     const ctrl = new AbortController();
@@ -43,6 +40,10 @@ export function useNasaSearch(filters: NasaSearchFilters): NasaSearchState {
     if (debounced.yearStart) params.set("yearStart", debounced.yearStart);
     if (debounced.yearEnd) params.set("yearEnd", debounced.yearEnd);
 
+    // Sync the loading flag with the in-flight fetch (the external system this
+    // effect is synchronizing with) — the rule's cascading-render concern does
+    // not apply to a single flip immediately before the network call.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState((s) => ({ ...s, loading: true, error: undefined }));
 
     fetch(`/api/nasa-search?${params.toString()}`, { signal: ctrl.signal })
@@ -59,6 +60,12 @@ export function useNasaSearch(filters: NasaSearchFilters): NasaSearchState {
 
     return () => ctrl.abort();
   }, [debounced.q, debounced.mediaType, debounced.yearStart, debounced.yearEnd]);
+
+  // Empty-query state is derived, not stored — avoids the
+  // react-hooks/set-state-in-effect cascading-render warning.
+  if (!debounced.q.trim()) {
+    return { items: [], totalHits: 0, loading: false };
+  }
 
   return state;
 }

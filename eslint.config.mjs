@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // feza-specific:
+    ".claude/**",          // agent skills + ephemeral worktree shadow trees
+    ".trunk/**",           // trunk-io configs
+    "coverage/**",         // vitest LCOV output (consumed by Sonar)
+    "storybook-static/**", // chromatic-built Storybook
+    ".storybook-out/**",   // /feza-story skill verification build
   ]),
 ]);
 
