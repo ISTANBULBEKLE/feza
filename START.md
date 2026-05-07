@@ -19,17 +19,20 @@ make test        # vitest one-shot
 make test-watch  # vitest watch mode
 make build       # production build
 make lint        # eslint
+make storybook   # Storybook on :6006
 make clean       # remove .next + node_modules
 make init        # fresh demo: clean + install + dev
-PR=123 make pr-review   # local /review-pr skill against PR #123
 ```
+
+`make help` lists every target, including the quality-pass ones (`lint-fix`, `lint-check`, `coverage`, `sonar`, `pr-review`, …).
 
 ## What to read next
 
 | File | When to read |
 |---|---|
-| `PROJECT_PLAN.md` | You want the full plan |
 | `CLAUDE.md` | You're using Claude Code in this repo |
-| `EPICS.md` | You want the ticket-by-ticket breakdown |
-| `INTEGRATION_STEPS_PLAN.md` | You want to wire Figma/GitHub/Canva |
-| `FEZA_PLAN.md` | You're giving the talk and want the narrative |
+| `documents/PROJECT_PLAN.md` | You want the full plan |
+| `documents/EPICS.md` | You want the ticket-by-ticket breakdown |
+| `documents/SETUP.md` | You're setting up CI (SonarCloud + Chromatic) |
+| `documents/INTEGRATION_STEPS_PLAN.md` | You're wiring Figma/GitHub/Canva |
+| `documents/FEZA_PLAN.md` | You're giving the talk and want the narrative |

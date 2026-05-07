@@ -32,4 +32,4 @@ cp .env.example .env.local   # paste a free NASA_API_KEY from https://api.nasa.g
 make init                    # clean install + dev server on :3000
 ```
 
-See `START.md` for the 60-second tour, `PROJECT_PLAN.md` for the full plan, `INTEGRATION_STEPS_PLAN.md` for wiring Figma / GitHub / Canva into Claude Code, and `SETUP.md` for the one-time SonarCloud + Chromatic checklist.
+See `START.md` for the 60-second tour, `documents/PROJECT_PLAN.md` for the full plan, `documents/INTEGRATION_STEPS_PLAN.md` for wiring Figma / GitHub / Canva into Claude Code, and `documents/SETUP.md` for the one-time SonarCloud + Chromatic checklist.
