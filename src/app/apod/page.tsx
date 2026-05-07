@@ -16,7 +16,7 @@ export const metadata = {
 //   4. reuse <PhotoGrid> from Epic 1 (with media_type === "video" handling)
 //   5. push branch → GitHub Action reviews the PR
 //
-// Reference impl spec is in PROJECT_PLAN.md → "Phase 2 — Epic 2".
+// Reference impl spec is in documents/PROJECT_PLAN.md → "Phase 2 — Epic 2".
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ApodPage() {

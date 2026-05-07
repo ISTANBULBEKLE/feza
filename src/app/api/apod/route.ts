@@ -11,7 +11,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   return NextResponse.json(
-    { error: "not implemented — live demo target. See PROJECT_PLAN.md → Epic 2." },
+    { error: "not implemented — live demo target. See documents/PROJECT_PLAN.md → Epic 2." },
     { status: 501 },
   );
 }
