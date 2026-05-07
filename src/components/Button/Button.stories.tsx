@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
   args: {
     variant: "primary",
-    children: "Search",
+    children: "Search NASA",
   },
 };
 
@@ -22,5 +22,13 @@ export const Ghost: Story = {
   args: {
     variant: "ghost",
     children: "Cancel",
+  },
+};
+
+export const Disabled: Story = {
+  args: {
+    variant: "primary",
+    children: "Search NASA",
+    disabled: true,
   },
 };
