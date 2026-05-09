@@ -65,3 +65,7 @@ Auth. Mobile-first design. i18n. Animation polish. The Mars Rover Photos API (de
 | "I'm trying this Monday" | 5+ verbatim audience quotes | Post-talk feedback |
 | Skill reuse | At least one viewer opens a PR using a feza skill adapted to their repo | Inbound forks |
 | Demo reliability | Zero on-stage failures | Pre-flight above |
+
+## Part 2 — extended arc
+
+A second narrative — same repo, same engineer, replaces the Figma → Epic 2 path with **Confluence spec → Jira backlog → Claude Design prototype → Claude Code → PR → Confluence status report**, building Epic 3 (`/asteroids`). Full plan in `documents/PART2_PLAN.md`. MCP wiring in `documents/ATLASSIAN_SETUP.md`. Tickets in `documents/EPICS_E3.md`.

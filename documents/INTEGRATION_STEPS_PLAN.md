@@ -88,27 +88,53 @@ So the workflow posts review comments under the "Claude" identity instead of `gi
 2. After `make test` is green: `git push -u origin feature/apod`, `gh pr create --fill`.
 3. Switch the projector to the PR page. Within ~2 min, four status checks land (lint / sonarcloud / chromatic / Claude review). Address one comment, push, watch the review re-run, `gh pr merge --squash`.
 
-## Step 3 — Canva
+## Step 3 — Canva (secondary, billing-limited)
 
-**Status (2026-05-07):** No officially-published Canva MCP server in Anthropic's registry. Manual export today; flag the upgrade path on stage.
-
-### 3.1 Manual export
-
-In Canva, open the *feza hero* design (1200×630). **Share → Download → PNG**. Save to `public/hero.png`. Optionally render `<img src="/hero.png" />` from `src/app/page.tsx`.
-
-### 3.2 Stage talking point
-
-> "Today this is a manual export. Tomorrow, when Canva ships an official MCP, this becomes a one-line Claude prompt — *and the rest of the workflow doesn't change.* That's the bet of the MCP ecosystem: **Claude is the constant; the integrations are the variable.**"
-
-### 3.3 When Canva ships an MCP
+**Status:** the Canva MCP **is** available now via the `claude.ai Canva` connector — already authenticated for the talk. Verify with:
 
 ```bash
-claude mcp add --transport http canva <official-url> --header "Authorization: Bearer $CANVA_TOKEN"
+claude mcp list   # expect: claude.ai Canva: https://mcp.canva.com/mcp - ✓ Connected
 ```
 
-Pattern (export → `public/`) stays the same.
+The MCP exposes `generate-design`, `create-design-from-candidate`, folder management (`search-folders`, `move-item-to-folder`), editing transactions, and brand-kit listing. Use cases on stage: graphic mockups, hero PNGs, social-post variants.
 
-## Step 4 — Bonus MCP: Playwright
+### 3.1 Hero asset workflow
+
+In Canva, open the *feza hero* design (1200×630). **Share → Download → PNG**. Save to `public/hero.png`. Optionally render `<img src="/hero.png" />` from `src/app/page.tsx`. (Could also be done via `mcp__claude_ai_Canva__export-design` directly into the repo, skipping the manual step.)
+
+### 3.2 Why Canva is *not* the design path for Epic 3
+
+`generate-design` produces stock-template colours unless you pass a `brand_kit_id` referencing a Canva **Brand Kit** — and Brand Kits are a **paid** Canva feature. Without it, mockups won't match `tokens.json`. The talk uses `claude.ai/design` (`documents/CLAUDE_DESIGN_PROMPTS.md`) as the canonical UI design path; Canva is a secondary graphic tool. Recipe for the eventual paid path lives in `documents/CANVA_BRAND_KIT.md`.
+
+### 3.3 Stage talking point
+
+> "Canva's MCP is here — connected, authenticated, ready. But on-palette generation needs a paid Brand Kit. So this talk uses claude.ai/design for UI, and Canva for graphic assets. Same MCP discipline, different tool for the right job — *Claude is the constant; the integrations are the variable.*"
+
+## Step 4 — Atlassian Remote MCP (Jira + Confluence)
+
+Used by Part 2 (`documents/PART2_PLAN.md`). Full playbook lives in `documents/ATLASSIAN_SETUP.md` — short version below.
+
+### 4.1 Register the MCP
+
+```bash
+claude mcp add --transport sse atlassian https://mcp.atlassian.com/v1/sse
+claude mcp list   # confirm "atlassian"
+```
+
+OAuth 2.1 with dynamic client registration — no client_id/secret to provision; the first tool call opens a browser auth window. Atlassian admin must approve the `Claude` MCP client once via Atlassian admin → Security → MCP clients.
+
+### 4.2 Demo flow (Part 2)
+
+1. **Discover** with `/atlassian:search-company-knowledge` (cited Confluence/Jira answers).
+2. **Decompose** with `/atlassian:spec-to-backlog` (Confluence page → Jira Epic + tickets).
+3. **Build** with `/feza-from-jira <KEY>` — the custom skill at `.claude/skills/feza-from-jira/` that dispatches to existing scaffold skills.
+4. **Report** with `/atlassian:generate-status-report` (Jira board → Confluence summary).
+
+### 4.3 Troubleshooting
+
+See `documents/ATLASSIAN_SETUP.md` § 5.
+
+## Step 6 — Bonus MCP: Playwright
 
 ```bash
 claude mcp add --transport stdio playwright -- npx -y @playwright/mcp@latest
@@ -116,16 +142,17 @@ claude mcp add --transport stdio playwright -- npx -y @playwright/mcp@latest
 
 Use case: *"take a screenshot of localhost:3000/apod and tell me if the layout matches the Figma frame."*
 
-## Step 5 — Verification
+## Step 7 — Verification
 
 ```bash
 make init          # clean install + dev server
 make test          # green
 make build         # green
-claude mcp list    # figma-dev, github, playwright
+claude mcp list    # figma-dev, github, atlassian, playwright
 
 curl 'http://localhost:3000/api/nasa-search?q=mars+rover'   # 200 + JSON
-curl 'http://localhost:3000/api/apod'                       # 501 (intentional — live-coded)
+curl 'http://localhost:3000/api/apod'                       # 501 (intentional — live-coded Part 1)
+curl 'http://localhost:3000/api/asteroids'                  # 501 (intentional — live-coded Part 2)
 ```
 
 If all green, you're stage-ready. CI gates verified separately by opening a small PR — see `documents/SETUP.md` § 3.

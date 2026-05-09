@@ -29,7 +29,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   return (
     <main>
       <header className={styles.header}>
-        <h1>Explore the NASA Image Library</h1>
+        <h1 className="fz-shine">Explore the NASA Image Library</h1>
         <p>
           Type a topic or pick a preset, then narrow by media type and year range.
           Results stream from

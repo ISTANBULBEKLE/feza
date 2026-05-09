@@ -9,6 +9,7 @@ import { cx } from "@/helpers/classNames";
 const NAV_LINKS = [
   { href: ROUTES.explore, label: "Explore" },
   { href: ROUTES.apod, label: "APOD" },
+  { href: ROUTES.asteroids, label: "Asteroids" },
 ] as const;
 
 export function Header() {

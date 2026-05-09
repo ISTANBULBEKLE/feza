@@ -1,5 +1,6 @@
 export const IMAGE_LIBRARY_BASE = "https://images-api.nasa.gov";
 export const APOD_BASE = "https://api.nasa.gov/planetary/apod";
+export const NEO_BASE = "https://api.nasa.gov/neo/rest/v1";
 
 /** Public NASA detail page for an asset (clickable from a PhotoCard). */
 export const nasaDetailUrl = (nasaId: string): string =>
