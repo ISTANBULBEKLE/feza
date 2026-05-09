@@ -15,12 +15,22 @@ describe("Header", () => {
     expect(screen.getByLabelText(/feza · home/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Explore" })).toHaveAttribute("href", "/explore");
     expect(screen.getByRole("link", { name: "APOD" })).toHaveAttribute("href", "/apod");
+    expect(screen.getByRole("link", { name: "Asteroids" })).toHaveAttribute("href", "/asteroids");
   });
 
   it("marks the active link via aria-current=page", () => {
     pathnameMock.mockReturnValue("/explore");
     render(<Header />);
     expect(screen.getByRole("link", { name: "Explore" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "APOD" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Asteroids" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("marks Asteroids active when pathname is /asteroids", () => {
+    pathnameMock.mockReturnValue("/asteroids");
+    render(<Header />);
+    expect(screen.getByRole("link", { name: "Asteroids" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Explore" })).not.toHaveAttribute("aria-current");
     expect(screen.getByRole("link", { name: "APOD" })).not.toHaveAttribute("aria-current");
   });
 
