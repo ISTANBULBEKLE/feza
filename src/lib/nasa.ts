@@ -1,4 +1,4 @@
-import { APOD_BASE, IMAGE_LIBRARY_BASE, type MediaType } from "@/constants/nasa";
+import { APOD_BASE, IMAGE_LIBRARY_BASE, NEO_BASE, type MediaType } from "@/constants/nasa";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // NASA Image Library — https://images-api.nasa.gov/search
@@ -115,4 +115,42 @@ export async function getApod(params: GetApodParams): Promise<ApodItem | ApodIte
     throw new Error(`NASA APOD returned ${res.status}`);
   }
   return res.json();
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// NeoWs (Near-Earth Objects) — https://api.nasa.gov/neo/rest/v1/feed
+// Live-coded in Part 2 (Epic 3). Signature shipped now so the placeholder
+// route handler at src/app/api/asteroids/route.ts can compile.
+// ──────────────────────────────────────────────────────────────────────────────
+
+export interface AsteroidItem {
+  id: string;
+  name: string;
+  closeApproachDate: string;
+  estimatedDiameterKmMin: number;
+  estimatedDiameterKmMax: number;
+  missDistanceKm: string;
+  relativeVelocityKps: string;
+  isPotentiallyHazardous: boolean;
+  nasaJplUrl: string;
+}
+
+export interface AsteroidsResult {
+  items: AsteroidItem[];
+  elementCount: number;
+}
+
+export interface GetAsteroidsParams {
+  apiKey: string;
+  startDate: string;
+  endDate?: string;
+  signal?: AbortSignal;
+}
+
+export async function getAsteroids(_params: GetAsteroidsParams): Promise<AsteroidsResult> {
+  // Stub — body is filled in live during Part 2 (E3-T2). Will hit
+  // `${NEO_BASE}/feed?start_date=...&end_date=...&api_key=...`, then map
+  // raw `near_earth_objects[date][]` into the flat AsteroidItem above.
+  void NEO_BASE;
+  throw new Error("getAsteroids — not implemented (Part 2 / E3-T2)");
 }

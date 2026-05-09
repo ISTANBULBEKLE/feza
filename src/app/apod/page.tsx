@@ -24,7 +24,7 @@ export default function ApodPage() {
     <main>
       <div className={styles.wrap}>
         <span className={styles.tag}>Epic 2 · live demo target</span>
-        <h1 className={styles.title}>Astronomy Picture of the Day</h1>
+        <h1 className={`${styles.title} fz-shine`}>Astronomy Picture of the Day</h1>
         <p className={styles.lead}>
           We will build this together on stage using <code>/feza-route</code> and{" "}
           <code>/feza-component</code> skills, the Figma MCP for the design hand-off, and

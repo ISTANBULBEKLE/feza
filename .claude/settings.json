@@ -20,6 +20,8 @@
       "Bash(git push *)",
       "Bash(curl http://localhost:*)",
       "Bash(curl https://images-api.nasa.gov/*)",
+      "Bash(curl https://api.nasa.gov/neo/*)",
+      "Bash(claude mcp list)",
       "Bash(node -v)",
       "Bash(npx --yes create-next-app@latest *)",
       "Read",
