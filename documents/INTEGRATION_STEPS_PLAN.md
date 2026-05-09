@@ -116,12 +116,23 @@ Used by Part 2 (`documents/PART2_PLAN.md`). Full playbook lives in `documents/AT
 
 ### 4.1 Register the MCP
 
+The talk uses the **bundled Atlassian plugin** that ships with Claude Code (registered as `plugin:atlassian:atlassian`, **HTTP transport**, endpoint `https://mcp.atlassian.com/v1/mcp`). Verify with:
+
 ```bash
-claude mcp add --transport sse atlassian https://mcp.atlassian.com/v1/sse
+claude mcp list
+# Expect: plugin:atlassian:atlassian: https://mcp.atlassian.com/v1/mcp (HTTP) - ✓ Connected
+```
+
+If the plugin isn't installed (e.g., a fresh `claude` install), register the MCP via CLI on the same HTTP endpoint:
+
+```bash
+claude mcp add --transport http atlassian https://mcp.atlassian.com/v1/mcp
 claude mcp list   # confirm "atlassian"
 ```
 
-OAuth 2.1 with dynamic client registration — no client_id/secret to provision; the first tool call opens a browser auth window. Atlassian admin must approve the `Claude` MCP client once via Atlassian admin → Security → MCP clients.
+> **Don't use `--transport sse`** with `https://mcp.atlassian.com/v1/sse` — that endpoint is deprecated after 2026-06-30. Stick to the HTTP `/v1/mcp` endpoint above for both the plugin and CLI paths.
+
+OAuth 2.1 with dynamic client registration — no `client_id`/`secret` to provision; the first tool call opens a browser auth window. Atlassian admin must approve the `Claude` MCP client once via Atlassian admin → Security → MCP clients.
 
 ### 4.2 Demo flow (Part 2)
 
@@ -134,7 +145,7 @@ OAuth 2.1 with dynamic client registration — no client_id/secret to provision;
 
 See `documents/ATLASSIAN_SETUP.md` § 5.
 
-## Step 6 — Bonus MCP: Playwright
+## Step 5 — Bonus MCP: Playwright
 
 ```bash
 claude mcp add --transport stdio playwright -- npx -y @playwright/mcp@latest
@@ -142,7 +153,7 @@ claude mcp add --transport stdio playwright -- npx -y @playwright/mcp@latest
 
 Use case: *"take a screenshot of localhost:3000/apod and tell me if the layout matches the Figma frame."*
 
-## Step 7 — Verification
+## Step 6 — Verification
 
 ```bash
 make init          # clean install + dev server

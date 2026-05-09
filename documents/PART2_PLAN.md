@@ -70,5 +70,5 @@ JSM (Jira Service Management) intake. Confluence whiteboards. Compass. Atlassian
 - `documents/EPICS_E3.md` — Epic 3 ticket-by-ticket breakdown
 - `documents/EPIC_2_TICKETS.md`, `documents/EPIC_3_TICKETS.md` — demo runbooks (the on-stage script)
 - `documents/CLAUDE_DESIGN_PROMPTS.md` — paste-ready prompts for the claude.ai/design screens
-- `documents/INTEGRATION_STEPS_PLAN.md` § Step 6 — Atlassian MCP (short version)
+- `documents/INTEGRATION_STEPS_PLAN.md` § Step 4 — Atlassian MCP (short version)
 - `.claude/skills/feza-from-jira/SKILL.md` — the orchestration skill

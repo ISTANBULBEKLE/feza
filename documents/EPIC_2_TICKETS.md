@@ -1,7 +1,7 @@
 # EPIC 2 — `/apod` · Demo runbook (Part 1)
 
 > Mirrors Jira project **`KAN`** (`feza 1`) on `ekipkalir.atlassian.net`.
-> Parent Epic: **KAN-1** "NASA /apod api — Astronomy Picture of the Day"
+> Parent Epic: **KAN-1** "NASA /apod API — Astronomy Picture of the Day"
 > Companion: `documents/EPICS.md` § Epic 2 (full 9-ticket breakdown).
 
 This file is the on-stage script for Part 1 of the talk. The audience watches Claude fetch each ticket via the Atlassian MCP, then build it via the feza scaffold skills.

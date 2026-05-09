@@ -64,7 +64,7 @@ The talk uses an existing software (next-gen Kanban) project on `ekipkalir.atlas
 Pre-staged ticket structure:
 
 ```
-KAN-1 (Epic)  NASA /apod api — Astronomy Picture of the Day
+KAN-1 (Epic)  NASA /apod API — Astronomy Picture of the Day
 ├── KAN-3    Scaffold /apod page + /api/apod route via /feza-route apod
 ├── KAN-4    Add DatePicker component via /feza-component DatePicker
 └── KAN-5    Wire ApodPanel — single-date vs random-N toggle
@@ -104,7 +104,7 @@ The current demo ships **without** a Confluence dependency — `documents/EPICS.
 | Tickets created in wrong project | First message: include the project key in your prompt: *"create them in project KAN"* |
 | "Tool not found: searchJiraIssuesUsingJql" | MCP isn't authenticated yet; full toolbelt only loads after Step 1 succeeds |
 | Demo Atlassian site asks for 2FA mid-demo | Pre-authenticate the morning of; if it triggers anyway, the Discover beat falls back to `documents/EPIC_3_TICKETS.md` |
-| Atlassian-Cloud rate limit on `createJiraIssue` | Space ticket creation by ~1s; the demo only reads/edits, doesn't create |
+| Atlassian Cloud rate limits on `createJiraIssue` | Space ticket creation by ~1s; the demo only reads/edits, doesn't create |
 
 ## Step 6 — Sample queries (memorise 2–3)
 

@@ -6,10 +6,22 @@ Why claude.ai/design and not Canva: claude.ai/design renders real HTML/CSS that 
 
 ## Global token snippet (used by every prompt)
 
-The dark theme is canonical for feza. Every prompt below references this palette:
+The **light theme is canonical** for feza; dark applies via `prefers-color-scheme: dark`. Every prompt below references this palette:
 
 ```
-DARK PALETTE (canonical)
+LIGHT PALETTE (canonical)
+  background      #F5F7FB
+  foreground      #0A1124
+  muted           #4A5468
+  surface         #FFFFFF
+  surface-2       #E9EEF7
+  border          #C9D2E3
+  accent          #2563EB
+  accent-strong   #1D4ED8
+  danger          #DC2626
+  on-accent       #FFFFFF   (text on filled accent — Button primary, HazardousPill)
+
+DARK PALETTE (override — @media prefers-color-scheme: dark)
   background      #0B0D12
   foreground      #E7EAF2
   muted           #8B93A7
@@ -19,17 +31,17 @@ DARK PALETTE (canonical)
   accent          #6CB4FF
   accent-strong   #9AD0FF
   danger          #FF7A7A
-  on-accent       #06121F   (text on filled accent)
+  on-accent       #06121F
 
-TYPOGRAPHY
-  family   Inter (regular 400 / semibold 600 / bold 700)
-  display  44px / 1.1 / -0.01em
-  h1       36px / 1.1
-  h2 (card) 22px / 1.2
-  h3 (card) 15px / 1.3
-  body     14px / 1.5
-  body-sm  13px / 1.5
-  body-xs  12px / 1.5
+TYPOGRAPHY (token-driven via CSS custom properties)
+  family   Inter (regular 400 / body 500 / semibold 600 / bold 700 / heading 800 / display 900)
+  display  44px / 1.1 / -0.025em      weight 900 (--fz-weight-display)
+  h1       36px / 1.1 / -0.025em      weight 900
+  h2 (card) 22px / 1.2                weight 800 (--fz-weight-heading)
+  h3 (card) 15px / 1.3                weight 800
+  body     14px / 1.5                 weight 500 (--fz-weight-body)
+  body-sm  13px / 1.5                 weight 500
+  body-xs  12px / 1.5                 weight 500
   label    12px uppercase / 0.06em
   eyebrow  13px uppercase / 0.08em
   tag      11px uppercase / 0.08em
@@ -39,12 +51,19 @@ RADII
   lg  16px (cards)
   pill 999px (chips, hazardous pill)
 
-SHADOWS
-  card-rest   0 6px 24px rgba(0,0,0,0.35)
-  card-hover  0 10px 28px rgba(0,0,0,0.40)
+SHADOWS (light canonical, layered)
+  card-rest    0 6px 20px rgba(10,17,36,0.08), 0 1px 2px rgba(10,17,36,0.04)
+  card-hover   0 12px 32px rgba(37,99,235,0.18), 0 2px 4px rgba(10,17,36,0.06)
+
+SHADOWS (dark override)
+  card-rest    0 6px 24px rgba(0,0,0,0.35)
+  card-hover   0 10px 28px rgba(0,0,0,0.40)
+
+UTILITY
+  .fz-shine — gradient text on hero H1s (linear-gradient 135deg from accent-strong → foreground → accent, background-clip: text)
 ```
 
-If your `feza` project already has these tokens loaded (from when you imported `tokens.json`), each prompt below will pick them up automatically. If not, paste this block first as a "design system primer" message.
+If your `feza` project already has these tokens loaded (from when you imported `tokens.json`), each prompt below will pick them up automatically. If not, paste this block first as a "design system primer" message. **Render screens in the light theme by default unless the prompt explicitly asks for the dark variant.**
 
 ---
 
@@ -55,32 +74,32 @@ If your `feza` project already has these tokens loaded (from when you imported `
 **Suggested screen name in claude.ai/design:** `Asteroids landing (Epic 3)`
 
 ```
-Build a screen named "Asteroids landing (Epic 3)" in the feza dark theme.
+Build a screen named "Asteroids landing (Epic 3)" in the feza light theme (canonical).
 
 CONTEXT
   Epic 3 of the feza app. Lives at /asteroids. User picks a date range (max 7 days), sees a grid of asteroids passing near Earth.
   Reuses <PhotoGrid> from Epic 1. New atom: <DateRangePicker>. New molecule: <AsteroidCard>. New atom inside the card: <HazardousPill>.
 
 LAYOUT (top to bottom, max-width 1100px, 20px horizontal padding)
-  1. Header strip (52px tall, surface bg #11151D with 12px backdrop blur, 1px bottom border #232A3A):
-       Left: "✦ feza" wordmark (Inter Bold 16px, white).
-       Right nav: ".explore", ".apod", ".asteroids" — link styling, 13px, ".asteroids" is the active one (color #6CB4FF, others #8B93A7).
+  1. Header strip (52px tall, surface bg #FFFFFF with 12px backdrop blur, 1px bottom border #C9D2E3):
+       Left: "✦ feza" wordmark (Inter heading-weight 800, 20px, color #0A1124).
+       Right nav: ".explore", ".apod", ".asteroids" — link styling, 16px, ".asteroids" is the active one (color #2563EB, others #4A5468).
   2. Page intro (32px top padding, 16px gap):
-       Eyebrow tag "EPIC 3 · NEAR-EARTH OBJECTS" — 11px uppercase, letter-spacing 0.08em, color #6CB4FF.
-       H1 "Near-Earth Objects" — 36px / 1.1, color #E7EAF2.
-       Lead paragraph "Asteroids passing close to Earth in your selected window. Source: NASA NeoWs feed." — 13px, color #8B93A7, max-width 65ch.
+       Eyebrow tag "EPIC 3 · NEAR-EARTH OBJECTS" — 11px uppercase, letter-spacing 0.08em, color #2563EB.
+       H1 "Near-Earth Objects" — 36px / 1.1, weight 900 (--fz-weight-display), letter-spacing -0.025em, apply .fz-shine gradient (linear-gradient 135deg from #1D4ED8 → #0A1124 → #2563EB, background-clip text).
+       Lead paragraph "Asteroids passing close to Earth in your selected window. Source: NASA NeoWs feed." — 13px, color #4A5468, max-width 65ch.
   3. Controls row (24px top margin, gap 12px, wraps on narrow viewports):
-       <DateRangePicker> — two date inputs side by side, labeled "Start" and "End" above each. Inputs: surface-2 bg #1A2030, 1px border #232A3A, 10px radius, padding 10px 12px, color #E7EAF2.
-       Below the picker, a 12px caption: "Max 7 days (NeoWs API limit)" — 12px, color #8B93A7.
-  4. Status row (16px top margin, 18px min-height): "12 asteroids found · 2026-05-09 → 2026-05-15" — 13px, color #8B93A7. While loading, replace with "Loading…" + aria-busy.
+       <DateRangePicker> — two date inputs side by side, labeled "Start" and "End" above each. Inputs: surface-2 bg #E9EEF7, 1px border #C9D2E3, 10px radius, padding 10px 12px, color #0A1124.
+       Below the picker, a 12px caption: "Max 7 days (NeoWs API limit)" — 12px, color #4A5468.
+  4. Status row (16px top margin, 18px min-height): "12 asteroids found · 2026-05-10 → 2026-05-15" — 13px, color #4A5468. While loading, replace with "Loading…" + aria-busy.
   5. Card grid (24px top margin, CSS grid auto-fill minmax(240px, 1fr), 16px gap):
-       Six <AsteroidCard> instances. Card bg #11151D, 1px border #232A3A, 16px radius, shadow 0 6px 24px rgba(0,0,0,0.35), padding 16px.
+       Six <AsteroidCard> instances. Card bg #FFFFFF, 1px border #C9D2E3, 16px radius, shadow 0 6px 20px rgba(10,17,36,0.08) + 0 1px 2px rgba(10,17,36,0.04), padding 16px.
        Card body (10px gap):
-         Top row: asteroid name (Inter semibold 15px, color #E7EAF2) on left; if hazardous, a HazardousPill on the right.
-         HazardousPill: red bg #FF7A7A, white #FFFFFF text "POTENTIALLY HAZARDOUS", 10px uppercase, letter-spacing 0.06em, pill radius 999px, padding 4px 10px.
-         Meta line: close-approach date — 12px, #8B93A7.
-         Stats grid (2 columns, 6px row gap): "Diameter ~50–110 m", "Miss distance 3.2M km", "Velocity 14 km/s", "Magnitude 19.7" — labels muted #8B93A7, values #E7EAF2.
-         Bottom-right small link "View on JPL →" — 12px, color #6CB4FF.
+         Top row: asteroid name (Inter heading-weight 800, 15px, color #0A1124) on left; if hazardous, a HazardousPill on the right.
+         HazardousPill: red bg #DC2626, white #FFFFFF text "POTENTIALLY HAZARDOUS", 10px uppercase, letter-spacing 0.06em, pill radius 999px, padding 4px 10px.
+         Meta line: close-approach date — 12px, #4A5468.
+         Stats grid (2 columns, 6px row gap): "Diameter ~50–110 m", "Miss distance 3.2M km", "Velocity 14 km/s", "Magnitude 19.7" — labels muted #4A5468, values #0A1124.
+         Bottom-right small link "View on JPL →" — 12px, color #2563EB.
 
 SAMPLE DATA (use these names/values across the 6 cards; mark cards 2 and 5 as hazardous)
   1. (2024 BC1)        2026-05-09  50–110 m   3.2M km   14.1 km/s   not hazardous
@@ -103,24 +122,24 @@ OUT OF SCOPE
 **Suggested screen name:** `AsteroidCard component (Epic 3)`
 
 ```
-Build a single-component spec sheet named "AsteroidCard component (Epic 3)" in the feza dark theme.
+Build a single-component spec sheet named "AsteroidCard component (Epic 3)" in the feza light theme (canonical).
 
 CANVAS
-  Centred 800px-wide section with feza dark page bg #0B0D12. Top eyebrow "COMPONENT · ASTEROIDCARD" — 11px uppercase #6CB4FF, letter-spacing 0.08em. H1 "AsteroidCard" — 36px #E7EAF2.
+  Centred 800px-wide section with feza light page bg #F5F7FB. Top eyebrow "COMPONENT · ASTEROIDCARD" — 11px uppercase #2563EB, letter-spacing 0.08em. H1 "AsteroidCard" — 36px #0A1124, weight 900, letter-spacing -0.025em, apply .fz-shine.
 
 SHOW THREE VARIANTS, STACKED 24px APART
-  1. Default (not hazardous) — name "(2024 BC1)", date 2026-05-09, diameter 50–110 m, miss distance 3.2M km, velocity 14.1 km/s, magnitude 21.4. No pill.
-  2. Hazardous — name "Apophis (99942)", date 2026-05-10, diameter 340 m, miss distance 31,000 km, velocity 7.4 km/s, magnitude 19.7. Red HazardousPill in the top-right.
-  3. Loading skeleton — three 12px-tall pill-shaped (radius 6px) shimmer placeholders: full-width, 60%-width, 40%-width. Bg #1A2030 with a subtle 1.4s linear shimmer.
+  1. Default (not hazardous) — name "(2024 BC1)", date 2026-05-10, diameter 50–110 m, miss distance 3.2M km, velocity 14.1 km/s, magnitude 21.4. No pill.
+  2. Hazardous — name "Apophis (99942)", date 2026-05-11, diameter 340 m, miss distance 31,000 km, velocity 7.4 km/s, magnitude 19.7. Red HazardousPill in the top-right.
+  3. Loading skeleton — three 12px-tall pill-shaped (radius 6px) shimmer placeholders: full-width, 60%-width, 40%-width. Bg #E9EEF7 with a subtle 1.4s linear shimmer.
 
 CARD STYLE (all variants)
-  Bg #11151D, 1px border #232A3A, radius 16px, padding 16px, shadow 0 6px 24px rgba(0,0,0,0.35).
-  Body gap 10px. Stats grid 2 columns, 6px row gap, labels #8B93A7, values #E7EAF2.
-  Name: Inter semibold 15px, color #E7EAF2. Date meta: 12px #8B93A7.
-  HazardousPill: bg #FF7A7A, text #FFFFFF, "POTENTIALLY HAZARDOUS" 10px uppercase, letter-spacing 0.06em, padding 4px 10px, radius 999px.
-  "View on JPL →" link bottom-right, 12px, color #6CB4FF.
+  Bg #FFFFFF, 1px border #C9D2E3, radius 16px, padding 16px, shadow 0 6px 20px rgba(10,17,36,0.08) + 0 1px 2px rgba(10,17,36,0.04).
+  Body gap 10px. Stats grid 2 columns, 6px row gap, labels #4A5468, values #0A1124.
+  Name: Inter heading-weight 800, 15px, color #0A1124. Date meta: 12px #4A5468.
+  HazardousPill: bg #DC2626, text #FFFFFF, "POTENTIALLY HAZARDOUS" 10px uppercase, letter-spacing 0.06em, padding 4px 10px, radius 999px.
+  "View on JPL →" link bottom-right, 12px, color #2563EB.
 
-ANNOTATIONS (in muted #8B93A7, 11px uppercase letter-spacing 0.08em, beneath each variant)
+ANNOTATIONS (in muted #4A5468, 11px uppercase letter-spacing 0.08em, beneath each variant)
   "DEFAULT", "HAZARDOUS — POTENTIALLY HAZARDOUS PILL", "LOADING SKELETON".
 ```
 
@@ -133,22 +152,22 @@ ANNOTATIONS (in muted #8B93A7, 11px uppercase letter-spacing 0.08em, beneath eac
 **Suggested screen name:** `DateRangePicker component (Epic 3)`
 
 ```
-Build a single-component spec named "DateRangePicker component (Epic 3)" in the feza dark theme.
+Build a single-component spec named "DateRangePicker component (Epic 3)" in the feza light theme (canonical).
 
 CANVAS
-  Centred 600px-wide section, feza dark bg #0B0D12. Top eyebrow "COMPONENT · DATERANGEPICKER" — 11px uppercase #6CB4FF, letter-spacing 0.08em. H1 "DateRangePicker" — 36px #E7EAF2.
+  Centred 600px-wide section, feza light bg #F5F7FB. Top eyebrow "COMPONENT · DATERANGEPICKER" — 11px uppercase #2563EB, letter-spacing 0.08em. H1 "DateRangePicker" — 36px #0A1124, weight 900, letter-spacing -0.025em, apply .fz-shine.
 
 SHOW THREE STATES, STACKED 24px APART
-  1. Default — start input "2026-05-09", end input "2026-05-15". Caption "Max 7 days (NeoWs API limit)".
-  2. Clamped — user picked end "2026-05-30", clamped to "2026-05-16". Caption replaced with "End clamped to start + 7 days." in #FF7A7A (danger).
-  3. Empty — both inputs unfilled, placeholder text "YYYY-MM-DD" in #8B93A7. Caption muted.
+  1. Default — start input "2026-05-10", end input "2026-05-16". Caption "Max 7 days (NeoWs API limit)".
+  2. Clamped — user picked end "2026-05-30", clamped to "2026-05-17". Caption replaced with "End clamped to start + 7 days." in #DC2626 (danger).
+  3. Empty — both inputs unfilled, placeholder text "YYYY-MM-DD" in #4A5468. Caption muted.
 
 STYLE
-  Two date inputs side by side, gap 12px. Each input wrapped with a label "Start" / "End" — labels are 12px uppercase, letter-spacing 0.06em, color #8B93A7, 6px above the input.
-  Input box: bg #1A2030, 1px border #232A3A, radius 10px, padding 10px 12px, text color #E7EAF2, font Inter regular 14px. Focus state: border becomes #6CB4FF.
-  Caption below the inputs: 12px, color #8B93A7 (or #FF7A7A in clamped state).
+  Two date inputs side by side, gap 12px. Each input wrapped with a label "Start" / "End" — labels are 12px uppercase, letter-spacing 0.06em, color #4A5468, 6px above the input.
+  Input box: bg #E9EEF7, 1px border #C9D2E3, radius 10px, padding 10px 12px, text color #0A1124, font Inter body-weight 500, 14px. Focus state: border becomes #2563EB.
+  Caption below the inputs: 12px, color #4A5468 (or #DC2626 in clamped state).
 
-ANNOTATIONS (in muted #8B93A7, 11px uppercase letter-spacing 0.08em, beneath each variant)
+ANNOTATIONS (in muted #4A5468, 11px uppercase letter-spacing 0.08em, beneath each variant)
   "DEFAULT", "CLAMPED — END > START + 7 DAYS", "EMPTY".
 ```
 
@@ -161,24 +180,24 @@ ANNOTATIONS (in muted #8B93A7, 11px uppercase letter-spacing 0.08em, beneath eac
 **Suggested screen name:** `DatePicker component (Epic 2)`
 
 ```
-Build a single-component spec named "DatePicker component (Epic 2)" in the feza dark theme.
+Build a single-component spec named "DatePicker component (Epic 2)" in the feza light theme (canonical).
 
 CANVAS
-  Centred 480px-wide section, feza dark bg #0B0D12. Top eyebrow "COMPONENT · DATEPICKER" — 11px uppercase #6CB4FF, letter-spacing 0.08em. H1 "DatePicker" — 36px #E7EAF2.
+  Centred 480px-wide section, feza light bg #F5F7FB. Top eyebrow "COMPONENT · DATEPICKER" — 11px uppercase #2563EB, letter-spacing 0.08em. H1 "DatePicker" — 36px #0A1124, weight 900, letter-spacing -0.025em, apply .fz-shine.
 
 SHOW THREE STATES, STACKED 24px APART
-  1. Default — value "2026-05-09".
+  1. Default — value "2026-05-10".
   2. Empty — placeholder "YYYY-MM-DD".
-  3. Disabled — value "2026-05-09", input dimmed (opacity 0.5), label still visible.
+  3. Disabled — value "2026-05-10", input dimmed (opacity 0.5), label still visible.
 
 STYLE
-  Label "Date" above input — 12px uppercase, letter-spacing 0.06em, color #8B93A7, 6px below the label, then the input.
-  Input box: bg #1A2030, 1px border #232A3A, radius 10px, padding 10px 12px, text color #E7EAF2, font Inter regular 14px. Min input width 200px. Focus state: border becomes #6CB4FF.
+  Label "Date" above input — 12px uppercase, letter-spacing 0.06em, color #4A5468, 6px below the label, then the input.
+  Input box: bg #E9EEF7, 1px border #C9D2E3, radius 10px, padding 10px 12px, text color #0A1124, font Inter body-weight 500, 14px. Min input width 200px. Focus state: border becomes #2563EB.
 
-ANNOTATIONS (in muted #8B93A7, 11px uppercase letter-spacing 0.08em, beneath each variant)
+ANNOTATIONS (in muted #4A5468, 11px uppercase letter-spacing 0.08em, beneath each variant)
   "DEFAULT", "EMPTY", "DISABLED".
 
-Mirror the visual language of your existing "Incoming screen (Epic 2)" so this feels like the same family of artefacts.
+Mirror the visual language of your existing "Incoming screen (Epic 2)" so this feels like the same family of artefacts. If that screen is in the older dark palette, regenerate or update it to match the new light canonical theme.
 ```
 
 ---
