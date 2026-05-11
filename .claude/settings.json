@@ -36,5 +36,20 @@
       "Bash(rm -rf /*)",
       "Bash(git reset --hard *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.tsx|*.ts|*.scss) npx --no-install eslint --max-warnings 0 --no-warn-ignored \"$f\" 2>&1 ;; esac; true",
+            "timeout": 30,
+            "statusMessage": "Linting changed file"
+          }
+        ]
+      }
+    ]
   }
 }

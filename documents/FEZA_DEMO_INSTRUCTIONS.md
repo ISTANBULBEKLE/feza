@@ -1,221 +1,252 @@
+# feza — Live Demo Runbook (Epic 2 + Epic 3)
 
-## Prerequisites
+> One-page execution guide for the talk *"Your AI Dev Partner in the Terminal: Claude Code, CLAUDE.md, Skills, Cowork, MCP for everyday dev work."*
+>
+> Companions:
+> - [PART2_PLAN.md](PART2_PLAN.md) — talk narrative.
+> - [EPIC_2_TICKETS.md](EPIC_2_TICKETS.md) / [EPIC_3_TICKETS.md](EPIC_3_TICKETS.md) — per-ticket detail; **also serve as offline backup** if Atlassian is unreachable.
+> - [DEMO_EPI2_EPI3_PROMPTS.md](DEMO_EPI2_EPI3_PROMPTS.md) — one-prompt shortcuts for Part 1 and Part 2 if you're short on time.
+> - [ATLASSIAN_SETUP.md](ATLASSIAN_SETUP.md) — Atlassian Remote MCP wiring.
 
-Before starting the demo, make sure:
+You will run the demo with **Claude Code inside the VS Code IDE extension** (split-pane: editor + Claude Code panel), the dev server (`make dev`) in one terminal, and a browser tab on the second monitor for Jira / Confluence / Anthropic Labs Design (claude.ai/design) and the running app.
+
+---
+
+## 0. Day-of pre-flight (morning of the talk)
+
+Run through this list while your coffee brews — most failure modes are caught here, not on stage.
 
 ```bash
-# 1. Clone the repo and enter the directory
-git clone https://github.com/IstanbulBekle/feza.git
-cd feza
-
-# 2. Install dependencies
+# Repo is clean and current
+git checkout main && git pull
 npm install
+make build                                  # Turbopack catches type errors `make dev` ignores
+make test                                   # all green
 
-# 3. Verify Claude Code is installed and authenticated
+# Claude Code + MCP are healthy
 claude --version
+claude mcp list                             # expect: plugin:atlassian:atlassian … ✓ Connected
+                                            # if "Needs authentication" → re-auth NOW, not on stage
+```
 
-# 4. Verify MCP servers are configured
-claude mcp list
-# Should show: atlassian (remote MCP)
+Environment:
 
-# 5. Verify the dev server works
-npm run dev
-# Open http://localhost:3000/explore — should load the shipped Epic 1
+```bash
+# .env.local must exist and contain a real NASA key.
+# Do NOT fall back to DEMO_KEY — its 30 req/hr cap will brick the live demo.
+cat .env.local
+# NASA_API_KEY=<your-key>
+```
 
-# 6. Create a clean branch for the demo
+External systems:
+
+- **Jira `KAN` project** on `ekipkalir.atlassian.net`: KAN-1..KAN-8 all in `To Do`, label `feza-demo`. Spot-check KAN-3, KAN-6, KAN-8.
+- **Anthropic Labs Design** (claude.ai/design) signed in, "feza" project open with **Epic 2** and **Epic 3** frames visible. These are your prototypes for the live demo.
+- **[tokens.json](../tokens.json)** open in a VS Code tab (you'll paste it into Anthropic Labs Design during Part 2 for on-palette output).
+- Any prior demo PR closed, branch deleted: `gh pr list` then `git branch -D demo/live-coding` if it exists from a rehearsal.
+- Backup screencast queued for the Atlassian + Design beats (in case the network bites).
+
+---
+
+## 1. Stage setup (VS Code IDE)
+
+1. Open the project folder in VS Code.
+2. Open the Claude Code panel: **Cmd+Esc** (macOS) or Command Palette → *"Claude Code: Open"*.
+3. Screen layout for the audience:
+   - **Left half of the laptop screen:** VS Code editor — keep the file you're discussing visible (the extension auto-shares the open tab + VS Code diagnostics with Claude).
+   - **Right half of the laptop screen:** Claude Code panel.
+   - **Second monitor (or projector):** browser with three pinned tabs — `http://localhost:3000`, Jira board, Anthropic Labs Design.
+4. Start the dev server in a side terminal: `make dev`. Leave it running for the whole talk.
+
+```bash
 git checkout -b demo/live-coding
 ```
 
 ---
 
-## PART 1 — Epic 2: Building `/apod` from KAN-1
+## 2. Add the hook — live, on-stage (teaching moment)
 
-> **Goal:** Build the Astronomy Picture of the Day page from three Jira tickets in one continuous Claude Code session.
+This is the "and one more thing" beat between Skills and the build. Insert it just before Part 1.
 
-### Step 1 — Launch Claude Code
+> **Script:** *"We've seen the rules — that's CLAUDE.md. We've seen the verbs — that's skills. Hooks are the enforcement layer: shell commands the harness runs on tool events. Watch what happens if I add a `PostToolUse` hook that lints every file Claude writes."*
 
-```bash
-claude
+Open [`.claude/settings.json`](../.claude/settings.json) in VS Code and add the `hooks` block (already wired in this repo — show it; if you've checked it out fresh, paste it):
+
+```jsonc
+"hooks": {
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write|MultiEdit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.tsx|*.ts|*.scss) npx --no-install eslint --max-warnings 0 --no-warn-ignored \"$f\" 2>&1 ;; esac; true",
+          "timeout": 30,
+          "statusMessage": "Linting changed file"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-### Step 2 — Fetch the Epic and ticket details from Jira
+After saving, the next `Edit` or `Write` Claude performs on a `.tsx` / `.ts` / `.scss` file fires ESLint on that single file. Audience reaction is loudest when ESLint flags a CLAUDE.md violation (global CSS, unused import, missing dependency) and Claude **self-corrects on the next turn without you typing anything**.
 
-Type in the Claude Code terminal:
+---
+
+## 3. PART 1 — Epic 2 (`/apod`)
+
+> Build the Astronomy Picture of the Day page from three Jira tickets (KAN-3, KAN-4, KAN-5) in one continuous Claude Code session.
+> **Time budget:** ~20 min. Shortcut: paste **Prompt 1** from [DEMO_EPI2_EPI3_PROMPTS.md](DEMO_EPI2_EPI3_PROMPTS.md) to drive Steps 3.2–3.5 in one go.
+
+### Step 3.1 — Fetch the Epic and ticket details from Jira
+
+In the Claude Code panel:
 
 ```
 /atlassian:search-company-knowledge KAN-1
 ```
 
-> This fetches the ticket bodies for Epic KAN-1 and its children: KAN-3, KAN-4, KAN-5.
-> Review the output to confirm all three child tickets are loaded.
+> Read the Epic body + the three child summaries aloud. **Backup:** if the MCP times out, read straight from [EPIC_2_TICKETS.md](EPIC_2_TICKETS.md) — it mirrors Jira verbatim.
 
-### Step 3 — Scaffold the /apod page and API route handler
+### Step 3.2 — Scaffold the /apod page and API route handler
 
 ```
 /feza-from-jira KAN-3
 ```
 
-> **What happens:** The `/feza-from-jira` skill reads KAN-3, detects it needs a route + API handler, and dispatches to `/feza-route`. This creates:
-> - `src/app/apod/page.tsx` — the /apod page (Server Component)
-> - `src/app/api/apod/route.ts` — the API route handler that calls api.nasa.gov/planetary/apod
-> - Typed response interfaces in `src/lib/nasa.ts`
+> Dispatches to `/feza-route`. Creates `src/app/apod/page.tsx`, `src/app/api/apod/route.ts`, typed `getApod()` in `src/lib/nasa.ts`.
+> Watch the hook (Step 2) fire ESLint on each write — that's your enforcement layer in action.
 
-### Step 4 — Scaffold the DatePicker component
+### Step 3.3 — Scaffold the DatePicker component
 
 ```
 /feza-from-jira KAN-4
 ```
 
-> **What happens:** Dispatches to `/feza-component`. Creates:
+> Dispatches to `/feza-component` (3-file pattern), then `/feza-story` for the Storybook baseline:
 > - `src/components/DatePicker/DatePicker.tsx`
 > - `src/components/DatePicker/DatePicker.module.scss`
 > - `src/components/DatePicker/DatePicker.test.tsx`
->
-> Then auto-dispatches to `/feza-story`:
 > - `src/components/DatePicker/DatePicker.stories.tsx`
 
-### Step 5 — Wire the ApodPanel and reuse PhotoGrid from Epic 1
+### Step 3.4 — Wire the ApodPanel and reuse PhotoGrid
 
 ```
 /feza-from-jira KAN-5
 ```
 
-> **What happens:** Creates `ApodPanel` component that composes `DatePicker` + reuses `PhotoGrid` from Epic 1. Wires everything into the /apod page.
+> Creates `<ApodPanel>` composing `<DatePicker>` and **reusing `<PhotoGrid>` from Epic 1** — call that reuse out loud, it's the demo's biggest "ah-ha".
 
-### Step 6 — Run tests
+### Step 3.5 — Run tests **and** the build
 
 ```
 /feza-unit-test
+make build
 ```
 
-> Or use the make command directly:
-> ```
-> make test
-> ```
-> Confirm all tests pass (green). This is the demo's punctuation mark.
+> Both. CLAUDE.md is explicit: always `make build` before claiming a feature is done — Turbopack catches type errors `make dev` happily ignores. Green tests + green build = the demo's punctuation.
 
-### Step 7 — Start dev server and verify visually
+### Step 3.6 — Verify in the browser
 
-```
-/feza-dev
-```
+Open `http://localhost:3000/apod`. Pick a date, watch the photo render. Walk the audience through the component tree (`<ApodPanel>` → `<DatePicker>` + `<PhotoGrid>`).
 
-> Open http://localhost:3000/apod in the browser. Walk the audience through the working page.
+### Step 3.7 — Push and open a Pull Request
 
-### Step 8 — Push and create a Pull Request
-
-Exit Claude Code (or use a separate terminal):
+In a side terminal (or from Claude):
 
 ```bash
 git add .
 git commit -m "feat(apod): build /apod page from KAN-1 epic"
-git push origin demo/live-coding
+git push -u origin demo/live-coding
 gh pr create --title "feat(apod): Astronomy Picture of the Day" --body "Built from KAN-3, KAN-4, KAN-5 via /feza-from-jira"
 ```
 
-> **4 CI gates fire in parallel:**
-> 1. `lint.yml` — ESLint flat configuration
+> **4 CI gates fire in parallel** — call them out as they go green:
+> 1. `lint.yml` — ESLint flat config
 > 2. `sonarcloud.yml` — SonarCloud quality threshold
-> 3. `chromatic.yml` — Visual regression (Storybook)
+> 3. `chromatic.yml` — Storybook visual regression
 > 4. `claude-pr-review.yml` — Claude runs `/review-pr` and posts comments
 
-### Step 9 (Optional) — Run PR review locally
+### Step 3.8 — Run PR review locally (rehearsal + CI insurance)
+
+While the GH workflows run:
 
 ```bash
 make pr-review PR=<PR_NUMBER>
 ```
 
+> Same `/review-pr` skill the CI fires. Running it locally proves you've rehearsed the review — and if a GH Action flakes mid-talk, you can paste the local review output and never miss a beat.
+
 ---
 
-## PART 2 — Epic 3: Building `/asteroids` from KAN-2
+## 4. PART 2 — Epic 3 (`/asteroids`)
 
-> **Goal:** Full Atlassian + Claude Design chain — Confluence spec → Jira → Design → Code → PR.
+> Full Atlassian + Claude Design chain — Confluence spec → Jira → Anthropic Labs Design → Code → PR.
+> **Time budget:** ~20 min. Shortcut: paste **Prompt 2** from [DEMO_EPI2_EPI3_PROMPTS.md](DEMO_EPI2_EPI3_PROMPTS.md) with the Design hand-off appended.
 
-### Step 1 — Convert Confluence spec to Jira tickets
-
-In Claude Code:
-
-```
-/atlassian:spec-to-backlog
-```
-
-> **What happens:** Reads the Confluence spec for Near-Earth Objects, creates Jira Epic KAN-2 with children:
-> - KAN-6: Add `getAsteroids` function to `src/lib/nasa.ts`
-> - KAN-7: Create `<DateRangePicker>` component
-> - KAN-8: Create `/asteroids` page with `<AsteroidsPanel>` + `<HazardousPill>`
-
-### Step 2 — Design the page in Claude Design
-
-Open a browser and navigate to:
+### Step 4.1 — Fetch Epic 3 from Jira
 
 ```
-https://claude.ai/design
+/atlassian:search-company-knowledge KAN-2
 ```
 
-**In Claude Design:**
+> Reads Epic 3 and lists KAN-6 / KAN-7 / KAN-8.
+> **Backup:** read from [EPIC_3_TICKETS.md](EPIC_3_TICKETS.md) if MCP times out.
 
-1. Paste the KAN-8 ticket description
-2. Upload or paste `DESIGN_SYSTEM_TOKEN.md` from the repo's `documents/` folder
-3. Iterate on the design (adjust layout, colors, spacing)
-4. Click **"Hand off to Claude Code"** — this generates a code bundle
+### Step 4.2 — Design the page in Anthropic Labs Design
 
-> Copy the hand-off output. You will paste it in Step 6.
+Switch to the browser tab on `claude.ai/design`.
 
-### Step 3 — Add the getAsteroids NASA API function
+1. Open the existing **"feza"** project → **Epic 3** frame.
+2. Paste the KAN-8 ticket description (you can copy it from the panel output of Step 4.1).
+3. Paste the contents of [`tokens.json`](../tokens.json) (the canonical token source — not `DESIGN_SYSTEM_TOKEN.md`).
+4. Iterate twice — narrate one prompt aloud, e.g. *"make the hazardous flag a red pill."*
+5. Click **"Hand off to Claude Code"**. Copy the hand-off bundle — you'll paste it in Step 4.5.
 
-Back in Claude Code:
-
-```
-/feza-from-jira KAN-6
-```
-
-> **What happens:** Edits `src/lib/nasa.ts` to add the `getAsteroids()` function. No scaffold needed — just adds to the existing file. Also creates/updates the `/api/asteroids/route.ts` handler.
-
-### Step 4 — Scaffold the DateRangePicker component
+### Step 4.3 — Scaffold the DateRangePicker (atom first)
 
 ```
 /feza-from-jira KAN-7
 ```
 
-> **What happens:** Dispatches to `/feza-component`. Creates:
-> - `src/components/DateRangePicker/DateRangePicker.tsx`
-> - `src/components/DateRangePicker/DateRangePicker.module.scss`
-> - `src/components/DateRangePicker/DateRangePicker.test.tsx`
-> - `src/components/DateRangePicker/DateRangePicker.stories.tsx`
+> Build atoms before composites. Creates the 3-file `DateRangePicker` component + Storybook story.
 
-### Step 5 — Scaffold the /asteroids page with Claude Design hand-off
+### Step 4.4 — Fill in the getAsteroids lib body (no-scaffold case)
+
+```
+/feza-from-jira KAN-6
+```
+
+> **This is the ticket that proves `/feza-from-jira` is smart, not just a scaffolder.** The signature for `getAsteroids` already exists in `src/lib/nasa.ts`. Claude reads the ticket, sees there's no skill to dispatch, and just opens an `Edit`. Show the audience the skill's decision table at [.claude/skills/feza-from-jira/SKILL.md](../.claude/skills/feza-from-jira/SKILL.md) — Step 2's "no-scaffold" row.
+
+### Step 4.5 — Wire the /asteroids page with the Design hand-off
 
 ```
 /feza-from-jira KAN-8
 ```
 
-> When prompted or during the build, paste the Claude Design hand-off code from Step 2.
->
-> **What happens:** Creates:
-> - `src/app/asteroids/page.tsx`
-> - `src/components/AsteroidsPanel/AsteroidsPanel.tsx` (using the design hand-off)
-> - `src/components/HazardousPill/HazardousPill.tsx`
-> - Associated `.module.scss`, `.test.tsx`, and `.stories.tsx` files
+> When Claude asks for the design, paste the Anthropic Labs Design hand-off from Step 4.2.
+> Creates `src/app/asteroids/page.tsx`, `<AsteroidsPanel>`, `<HazardousPill>` and their `.module.scss` / `.test.tsx` / `.stories.tsx`.
 
-### Step 6 — Run tests and verify
+### Step 4.6 — Tests **and** build
 
 ```
 /feza-unit-test
+make build
 ```
 
-> Then start the dev server:
-> ```
-> /feza-dev
-> ```
-> Open http://localhost:3000/asteroids and walk through the page.
+### Step 4.7 — Verify in the browser
 
-### Step 7 — Push, create PR, and generate status report
+`http://localhost:3000/asteroids`. Pick a date range. Show the hazardous pill rendering for at least one NEO.
+
+### Step 4.8 — Push, open PR, publish status report
 
 ```bash
 git add .
 git commit -m "feat(asteroids): build /asteroids page from KAN-2 epic"
 git push origin demo/live-coding
-gh pr create --title "feat(asteroids): Near-Earth Objects" --body "Built from KAN-6, KAN-7, KAN-8 via /feza-from-jira + Claude Design hand-off"
+gh pr create --title "feat(asteroids): Near-Earth Objects" --body "Built from KAN-6, KAN-7, KAN-8 via /feza-from-jira + Anthropic Labs Design hand-off"
 ```
 
 Then back in Claude Code:
@@ -224,39 +255,50 @@ Then back in Claude Code:
 /atlassian:generate-status-report
 ```
 
-> **What happens:**
-> - 4 CI gates fire in parallel on the PR
-> - `/review-pr` posts review comments
-> - Confluence summary is auto-published with build status
+> Auto-publishes a Confluence summary with the PR link, ticket statuses, and build state. **The "Monday morning, you can run this end-to-end" closing slide.**
 
 ---
 
-## Quick Reference — All Commands Used
+## 5. Failure-recovery cheats
 
-| Command | What It Does |
+| If… | Then… |
 |---|---|
-| `/atlassian:search-company-knowledge KAN-N` | Fetch Jira ticket details |
-| `/atlassian:spec-to-backlog` | Confluence spec → Jira epic + tickets |
+| Atlassian MCP timeouts or OAuth expires | Read straight from [EPIC_2_TICKETS.md](EPIC_2_TICKETS.md) / [EPIC_3_TICKETS.md](EPIC_3_TICKETS.md). They mirror the Jira bodies verbatim. |
+| Anthropic Labs Design is slow / unreachable | Use the pre-rendered Canva mockups per [CANVA_BRAND_KIT.md](CANVA_BRAND_KIT.md). |
+| GitHub Actions queue is slow on stage | Run `make pr-review PR=<n>` locally — same `/review-pr` skill. |
+| `/atlassian:generate-status-report` fails | Skip it. [PART2_PLAN.md](PART2_PLAN.md) flags it as the most expendable beat. |
+| Dev server stuck | Kill the background `make dev`, run `/feza-dev` to restart. |
+| You typed the wrong KAN key | `git reset --soft HEAD` (no destructive flag) is allowed; then re-run `/feza-from-jira <correct-key>`. |
+
+---
+
+## 6. Quick Reference — All Commands
+
+| Command | What it does |
+|---|---|
+| `/atlassian:search-company-knowledge KAN-N` | Fetch Jira ticket details (Epic or child) |
+| `/atlassian:spec-to-backlog` | Confluence spec → Jira Epic + tickets |
 | `/atlassian:generate-status-report` | Auto-publish Confluence summary |
 | `/feza-from-jira KAN-N` | Read ticket, dispatch to right scaffold skill |
-| `/feza-route` | Scaffold App Router page + paired API handler |
-| `/feza-component` | Three-file component (.tsx + .scss + .test) |
-| `/feza-story` | Storybook CSF3 story |
-| `/nasa-fetch` | Typed NASA wrapper in lib/ |
-| `/feza-dev [port]` | Start Next.js dev server (Turbopack) |
+| `/feza-route <segment>` | Scaffold App Router page + paired API route |
+| `/feza-component <Name>` | Three-file component (`.tsx` + `.scss` + `.test`) |
+| `/feza-story <Name>` | Storybook CSF3 story |
+| `/nasa-fetch <endpoint>` | Typed NASA wrapper in `src/lib/` |
+| `/feza-dev` | Start Next.js dev server (Turbopack, port 3000) |
 | `/feza-build` | Production build |
 | `/feza-lint [path]` | ESLint over repo or path |
 | `/feza-unit-test [pattern]` | Vitest, optionally filtered |
 | `/eslint-check` | Triaged lint report |
 | `/sonar-scan` | Local SonarCloud scan |
-| `/review-pr` | PR validation against CLAUDE.md |
+| `/review-pr <N>` | PR validation against CLAUDE.md |
 
 ---
 
-## Tips for the Live Demo
+## 7. Tips for the Live Demo
 
-1. **Keep one terminal, one session.** The whole demo runs in a single Claude Code session — this shows the agentic memory across steps.
-2. **Talk while Claude works.** Claude takes a few seconds per scaffold. Narrate what it's doing: "It's reading the ticket, detecting it needs a component, dispatching to feza-component..."
-3. **Show the files.** After each step, quickly `ls` the created files or open them in the IDE to show the three-file pattern.
+1. **One terminal, one session.** The whole demo runs in a single Claude Code session — this shows the agentic memory across steps.
+2. **Talk while Claude works.** Each scaffold takes a few seconds. Narrate: *"It's reading the ticket, detecting it needs a component, dispatching to feza-component…"*
+3. **Show the files.** After each step, open the created files in the VS Code editor pane — the three-file pattern is your visual proof.
 4. **Tests are your punctuation.** Green tests after each section give the audience confidence.
 5. **The PR is the finale.** Four CI gates running in parallel is a strong visual ending.
+6. **Anthropic Labs Design = claude.ai/design.** If you slip and say one or the other on stage, they're the same surface.
