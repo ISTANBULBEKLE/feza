@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Epic 2 — /apod prototype</title>
+  <template id="__bundler_thumbnail">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2563eb"/><text x="50" y="58" font-size="32" font-weight="900" text-anchor="middle" fill="#fff" font-family="sans-serif">2</text></svg>
+  </template>
+  <link rel="stylesheet" href="../feza.css"/>
+  <style>
+    body { margin: 0; background: #f5f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 80px; }
+    .lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #4a5468; margin: 24px 0 8px; }
+    .frame { background: #fff; border: 1px solid #c9d2e3; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(10,17,36,.08); }
+    h1.hdr { font-size: 28px; font-weight: 900; letter-spacing: -.025em; color: #0a1124; margin: 0 0 4px; }
+    p.sub { color: #4a5468; margin: 0 0 24px; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="hdr">Epic 2 — /apod</h1>
+    <p class="sub">Astronomy Picture of the Day. Below: the live screen, then the DatePicker component spec.</p>
+
+    <div class="lbl">/apod — full screen</div>
+    <div class="frame" id="screen"></div>
+
+    <div class="lbl">DatePicker — component states</div>
+    <div class="frame" id="datepicker"></div>
+  </div>
+
+  <script type="text/babel" src="../components/Header.jsx"></script>
+  <script type="text/babel" src="../components/PhotoCard.jsx"></script>
+  <script type="text/babel" src="../components/Screens.jsx"></script>
+  <script type="text/babel" src="../components/Specs.jsx"></script>
+  <script type="text/babel">
+    ReactDOM.createRoot(document.getElementById("screen")).render(<ApodScreen/>);
+    ReactDOM.createRoot(document.getElementById("datepicker")).render(<DatePickerSpec/>);
+  </script>
+</body>
+</html>
