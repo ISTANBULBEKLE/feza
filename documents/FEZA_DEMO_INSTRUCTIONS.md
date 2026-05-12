@@ -6,9 +6,9 @@
 > - [PART2_PLAN.md](PART2_PLAN.md) / [FEZA_PLAN.md](FEZA_PLAN.md) — talk narrative.
 > - [EPIC_2_TICKETS.md](EPIC_2_TICKETS.md) / [EPIC_3_TICKETS.md](EPIC_3_TICKETS.md) — per-ticket detail; **also serve as offline backup** if Atlassian is unreachable.
 > - [DEMO_EPI2_EPI3_PROMPTS.md](DEMO_EPI2_EPI3_PROMPTS.md) — one-prompt shortcuts for Part 1 and Part 2.
-> - [CLAUDE_DESIGN_PROMPTS.md](CLAUDE_DESIGN_PROMPTS.md) — the prompts that produced the screens in your `claude.ai/design` "feza" project.
 > - [ATLASSIAN_SETUP.md](ATLASSIAN_SETUP.md) — Atlassian Remote MCP wiring.
-> - [../design-handoff/](../design-handoff/) — the **local** design contract (already extracted; this is what the build beats consume).
+> - [../design-handoff/](../design-handoff/) — the **canonical** design contract for the live demo. `tokens.css`, per-epic READMEs with Claude Code prompts, and `preview.standalone.html` visual references all live here.
+> - [CLAUDE_DESIGN_PROMPTS.md](CLAUDE_DESIGN_PROMPTS.md) — *historical.* The original briefs sent to `claude.ai/design`; the rendered output now lives in `design-handoff/`. Don't pull design from here during the demo.
 
 **You run the demo from Claude Code inside VS Code's integrated terminal.** One window, three split panes + one browser:
 
@@ -55,6 +55,8 @@ claude mcp list                           # expect: plugin:atlassian:atlassian �
 make dev &
 sleep 4
 curl -s http://localhost:3000/ | grep -q 'feza' && echo "dev OK"
+# Pre-stage the route is the 501 placeholder stub (`{"error":"not implemented …"}`).
+# After Part 1's build flow, the same curl returns the real NASA payload.
 curl -s "http://localhost:3000/api/apod?date=2026-05-10" | head -c 200
 make stop
 
@@ -83,8 +85,7 @@ External systems checklist:
   - **"AsteroidCard component (Epic 3)"** — atom spec.
   - **"DateRangePicker component (Epic 3)"** — atom spec.
   - **"DatePicker component (Epic 2)"** — optional supporting view.
-- **`tokens.json`** open in a Claude Design buffer (already in your project; have it ready in case you need to re-paste).
-- **`design-handoff/tokens.css`** synced with `tokens.json` (run `diff` if unsure — values must match).
+- **`design-handoff/tokens.css`** is the **authoritative** token source for tomorrow's build. Spot-check that `src/app/globals.scss` matches its values (run `diff` if unsure).
 - **Backup screencast** queued for the Atlassian beat (in case the network bites).
 - **Claude Cowork** desktop app installed and logged in (used for the 60s parity beat in §1.2).
 
@@ -133,7 +134,7 @@ Browser → claude.ai/design → **"feza"** project. Flip through, narrating eac
 - **"Asteroids landing (Epic 3)"** — the /asteroids brief.
 - **"AsteroidCard component (Epic 3)"** — atom spec.
 - **"DateRangePicker component (Epic 3)"** — atom spec.
-- Open the **tokens.json** panel — *"these tokens are the contract; they're already in `globals.scss` and exported to `design-handoff/tokens.css` in the repo."*
+- Briefly show `design-handoff/tokens.css` in VS Code — *"these tokens are the contract. `claude.ai/design` produced them, the repo holds the export, and `globals.scss` consumes them. Single source of truth, locally available."*
 
 Land the handover: *"I've already exported these prototypes into the repo at `design-handoff/`. That's our design contract — Claude Code reads it locally during the build. No tab-switching required mid-flow."*
 
@@ -144,7 +145,7 @@ In VS Code Explorer, open and narrate each:
 - `CLAUDE.md` — *"slide 11's constraints, in writing. SCSS modules only, server components by default, await `params` / `searchParams`, NASA_API_KEY server-only."*
 - `.claude/skills/` — open `feza-from-jira/SKILL.md` briefly. *"This is the skill that reads a Jira ticket and dispatches to the right scaffold skill."*
 - `.claude/settings.json` — show the **PostToolUse ESLint hook** (preview of §2).
-- `src/app/` — *"routes only — `page.tsx`, `route.ts`, `proxy.ts`."*
+- `src/app/` — *"routes plus route-specific client panels — `page.tsx`, `route.ts`, `proxy.ts`, and a colocated `<Segment>Panel.tsx` (Client Component) where the page needs interactivity. Epic 1's `/explore` already shows this pattern with `ExplorePanel.tsx`."*
 - `src/components/PhotoGrid/` — the three-file pattern (`.tsx` + `.module.scss` + `.test.tsx`). This is the component we'll reuse in both epics.
 - `design-handoff/epic-2/README.md` and `design-handoff/epic-3/README.md` — *"the design hand-off, written as markdown prompts. Claude reads these the same way it reads any other input."*
 - `.github/workflows/` — the four CI gates (slide 12): `lint.yml`, `chromatic.yml`, `sonarcloud.yml`, `claude-pr-review.yml`.
@@ -226,9 +227,9 @@ make test
 make test
 ```
 
-> KAN-3 dispatches `/feza-route apod` → `src/app/apod/page.tsx`, `ApodPanel.tsx` (`"use client"`), `apod.module.scss`, `/api/apod/route.ts`.
-> KAN-4 dispatches `/feza-component DatePicker` + `/feza-story`.
-> KAN-5 has no scaffold — Claude reads the ticket, recognises the file already exists, and opens an `Edit`. Highlight the **PhotoGrid reuse**: *"Claude knows from CLAUDE.md and the file tree that PhotoGrid already exists. Component reuse is enforced, not encouraged."*
+> KAN-3 dispatches `/feza-route apod` → `src/app/apod/page.tsx` (async, awaits `searchParams`), `ApodPanel.tsx` (`"use client"`, empty stub), `ApodPanel.module.scss`, `/api/apod/route.ts` (stub returning `{ ok: true }`). The skill also cleans up the staged `placeholder.module.scss`.
+> KAN-4 dispatches `/feza-component DatePicker` + `/feza-story`. The bare component is `{ className, children }` — Claude then live-codes it into the KAN-4 shape (`{ id, label, value?, min?, max?, onChange }`, `<input type="date">`).
+> KAN-5 has no scaffold — Claude reads the ticket, recognises the panel already exists from KAN-3, and opens an `Edit` to wire the toggle, fetch, and `<PhotoGrid>` reuse. **Beat to call out:** *"Claude knows from CLAUDE.md and the file tree that PhotoGrid already exists. Component reuse is enforced, not encouraged."* KAN-5 also typically includes wiring `/api/apod/route.ts` to call `getApod()` (already shipped in `src/lib/nasa.ts`) — otherwise the panel renders the empty state.
 
 ### 3.4 — Type-safe build + browser smoke
 
@@ -544,7 +545,7 @@ The demo's strength is the **honest loop**: red gate → follow-up commit → gr
 | `/atlassian:spec-to-backlog` | Confluence spec → Jira Epic + tickets |
 | `/atlassian:generate-status-report` | Auto-publish Confluence summary |
 | `/feza-from-jira KAN-N` | Read ticket, dispatch to right scaffold skill |
-| `/feza-route <segment>` | Scaffold App Router page + paired API route |
+| `/feza-route <segment>` | Scaffold async page + colocated `<Segment>Panel` client stub + SCSS + API route (auto-cleans `placeholder.module.scss`) |
 | `/feza-component <Name>` | Three-file component (`.tsx` + `.scss` + `.test`) |
 | `/feza-story <Name>` | Storybook CSF3 story |
 | `/nasa-fetch <endpoint>` | Typed NASA wrapper in `src/lib/` |

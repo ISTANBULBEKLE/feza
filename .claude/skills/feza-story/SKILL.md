@@ -8,7 +8,7 @@ Scaffold a stories file for component `$Name`.
 
 Verify `src/components/$Name/$Name.tsx` is present. If not, stop and tell the user to scaffold it first with `/feza-component $Name`. Verify `.storybook/main.ts` is present; if not, stop and tell the user to run `npx storybook@latest init --type nextjs` once.
 
-Read `src/components/$Name/$Name.tsx` and pick out the exported `${Name}Props`. Use what you find to choose sensible `args` for the stories. **If the props include a `variant` union (e.g. `"primary" | "ghost"`), emit one named story per variant** (`Primary`, `Ghost`, …). Otherwise emit `Default` plus one variant story (`WithClassName`, or — if the domain suggests it — `Loading` / `Empty` / `Error` / `WithImage`). If `${Name}Props` includes `children: ReactNode`, set `args.children` to a short literal string.
+Read `src/components/$Name/$Name.tsx` and pick out the exported `$NameProps`. Use what you find to choose sensible `args` for the stories. **If the props include a `variant` union (e.g. `"primary" | "ghost"`), emit one named story per variant** (`Primary`, `Ghost`, …). Otherwise emit `Default` plus one variant story (`WithClassName`, or — if the domain suggests it — `Loading` / `Empty` / `Error` / `WithImage`). If `$NameProps` includes `children: ReactNode`, set `args.children` to a short literal string.
 
 Write `src/components/$Name/$Name.stories.tsx`:
 
@@ -28,7 +28,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    // TODO: fill from ${Name}Props
+    // TODO: fill from $NameProps
   },
 };
 ```
