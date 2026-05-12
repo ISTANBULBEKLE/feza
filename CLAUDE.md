@@ -35,15 +35,17 @@ Tickets in `documents/EPICS.md` (Epic 1 & 2) and `documents/EPICS_E3.md` (Epic 3
 
 ```
 src/
-  app/                 routes only (page.tsx, layout.tsx, loading.tsx, route.ts, proxy.ts)
-  components/<Name>/   <Name>.tsx + <Name>.module.scss + <Name>.test.tsx + <Name>.stories.tsx
+  app/<segment>/       routes — page.tsx, layout.tsx, loading.tsx, route.ts, proxy.ts,
+                       plus colocated route-specific client panels (e.g. ExplorePanel.tsx,
+                       ApodPanel.tsx) and their .module.scss + .test.tsx
+  components/<Name>/   reusable atoms/molecules — <Name>.tsx + <Name>.module.scss + <Name>.test.tsx + <Name>.stories.tsx
   hooks/               useThing.ts (each starts with "use client" if it uses React hooks)
   helpers/             pure functions, no React
   lib/                 server-aware modules (NASA wrappers, env accessors)
   constants/           static config (URLs, presets, route paths)
 ```
 
-`src/components`, `src/hooks`, `src/helpers`, `src/lib`, `src/constants` are **siblings** of `src/app/` — never inside `app/`.
+`src/components`, `src/hooks`, `src/helpers`, `src/lib`, `src/constants` are **siblings** of `src/app/` — never inside `app/`. Route-specific client panels (used only by one page) live next to their page; **reusable** components live under `src/components/<Name>/`.
 
 ## Commands
 
@@ -82,7 +84,7 @@ Skills live in `.claude/skills/`. Claude Code auto-discovers them — the README
 ## Don't
 
 - Don't add Tailwind, CSS-in-JS, or global CSS beyond `globals.scss`.
-- Don't create a folder under `src/app/` that isn't a route — colocated helpers belong in `src/`.
+- Don't put **reusable** components or helpers under `src/app/` — those go in `src/components/<Name>/` or `src/helpers/`. Route-specific client panels (e.g. `ExplorePanel.tsx`, `ApodPanel.tsx`) may be colocated next to their page.
 - Don't fall back to `DEMO_KEY` for NASA APOD — its 30 req/hr cap will brick the live demo. Throw if `NASA_API_KEY` is unset.
 - Don't commit `.env.local`. Use `.env.example` as the contract.
 - Don't pre-build Epic 2 (`/apod`) — it stays as a placeholder until the live demo. The lib/route signatures are pre-shipped so the demo flow is "fill in the body, not invent it."
