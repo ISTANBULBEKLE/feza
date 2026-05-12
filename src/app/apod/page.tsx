@@ -14,9 +14,11 @@ export const metadata = {
 //   2. /feza-component DatePicker
 //   3. wire date OR count selectors
 //   4. reuse <PhotoGrid> from Epic 1 (with media_type === "video" handling)
-//   5. push branch → GitHub Action reviews the PR
+//   5. push branch → GitHub Actions runs the 4 gates → @claude review → merge
 //
-// Reference impl spec is in documents/PROJECT_PLAN.md → "Phase 2 — Epic 2".
+// Design hand-off: design-handoff/epic-2/README.md (markdown spec) +
+//                  design-handoff/epic-2/preview.standalone.html (visual ref).
+// Reference impl spec: documents/PROJECT_PLAN.md → "Phase 2 — Epic 2".
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ApodPage() {
@@ -27,8 +29,9 @@ export default function ApodPage() {
         <h1 className={`${styles.title} fz-shine`}>Astronomy Picture of the Day</h1>
         <p className={styles.lead}>
           We will build this together on stage using <code>/feza-route</code> and{" "}
-          <code>/feza-component</code> skills, the Figma MCP for the design hand-off, and
-          the GitHub Action for the post-merge code review.
+          <code>/feza-component</code> skills, the local{" "}
+          <code>design-handoff/epic-2/</code> contract, and a Claude PR review
+          summoned from the GitHub Action.
         </p>
         <ol className={styles.steps}>
           <li>Scaffold page + route handler with <code>/feza-route apod</code></li>

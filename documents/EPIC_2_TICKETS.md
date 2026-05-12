@@ -112,7 +112,10 @@ Third live ticket. Demonstrates **component reuse** — `<PhotoGrid>` is already
 /feza-from-jira KAN-5                          # no scaffold; dispatches an Edit on ApodPanel.tsx
 make test
 git push -u origin feature/apod
-gh pr create --fill                            # 4 workflows fire; merge after Claude review
+gh pr create \
+  --title "feat(apod): Astronomy Picture of the Day" \
+  --body "Built from KAN-3, KAN-4, KAN-5 via /feza-from-jira. Design hand-off from design-handoff/epic-2/."
+                                               # 4 workflows fire; merge after Claude review
 ```
 
 ### Claude Design reference

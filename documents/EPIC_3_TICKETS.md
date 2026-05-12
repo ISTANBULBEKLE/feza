@@ -131,7 +131,10 @@ The headline ticket of Part 2. Open `claude.ai/design` in a browser tab, paste t
 # → paste the Claude Design hand-off into AsteroidsPanel.tsx
 make test
 git push -u origin feature/asteroids
-gh pr create --fill                            # 4 workflows fire
+gh pr create \
+  --title "feat(asteroids): Near-Earth Objects" \
+  --body "Built from KAN-6, KAN-7, KAN-8 via /feza-from-jira + design-handoff/epic-3/."
+                                               # 4 workflows fire
 ```
 
 ### Claude Design reference

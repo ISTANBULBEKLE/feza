@@ -21,6 +21,9 @@ Build Epic 2 — the /apod (Astronomy Picture of the Day) feature for the feza t
 SOURCE OF TRUTH
 Jira project KAN on ekipkalir.atlassian.net. Parent Epic KAN-1 with three child tickets: KAN-3, KAN-4, KAN-5. The full 9-ticket spec lives in documents/EPICS.md § Epic 2; documents/EPIC_2_TICKETS.md is the demo runbook. Read those if anything in Jira is ambiguous.
 
+STEP 0 — SEED THE DESIGN CONTRACT
+Read design-handoff/epic-2/README.md and design-handoff/tokens.css. These are the visual + token contract for Epic 2. Treat them as authoritative — globals.scss must match tokens.css, not the other way around. Use them as the spec when building KAN-3/4/5 in Step 2.
+
 STEP 1 — FETCH
 Run /atlassian:search-company-knowledge KAN-1
 Read the Epic description aloud. Then list the three children (KAN-3, KAN-4, KAN-5) with their summaries and acceptance criteria — the audience needs to see what we're about to build.
@@ -57,7 +60,7 @@ CONSTRAINTS
 
 ## Prompt 2 — Epic 3 · `/asteroids` (Part 2, ~12 min on stage)
 
-This one carries the design hand-off. Before pasting, switch to your `claude.ai/design` `feza` project, open the **"Asteroids landing (Epic 3)"** screen, click **Hand off to Claude Code**, and copy the export bundle. Paste it at the bottom of the prompt where indicated.
+The design hand-off lives in `design-handoff/epic-3/` (already exported). The prompt seeds it in Step 0, so paste-and-send works without touching the browser. (If you want to show lineage during §1.3's tab tour, that's the moment for claude.ai/design — not here.)
 
 ```
 Build Epic 3 — the /asteroids (Near-Earth Objects) feature for the feza talk Part 2 demo.
@@ -65,7 +68,10 @@ Build Epic 3 — the /asteroids (Near-Earth Objects) feature for the feza talk P
 This is the headline live-coded beat: Confluence-or-Jira spec → Claude Design hand-off → Claude Code → green tests → PR.
 
 SOURCE OF TRUTH
-Jira project KAN on ekipkalir.atlassian.net. Parent Epic KAN-2 with three child tickets: KAN-6 (lib body, no scaffold), KAN-7 (DateRangePicker atom), KAN-8 (page wiring + the Claude Design hand-off pasted at the bottom of this message). Full 9-ticket spec in documents/EPICS_E3.md; demo runbook in documents/EPIC_3_TICKETS.md.
+Jira project KAN on ekipkalir.atlassian.net. Parent Epic KAN-2 with three child tickets: KAN-6 (lib body, no scaffold), KAN-7 (DateRangePicker atom), KAN-8 (page wiring + the design hand-off seeded in Step 0). Full 9-ticket spec in documents/EPICS_E3.md; demo runbook in documents/EPIC_3_TICKETS.md.
+
+STEP 0 — SEED THE DESIGN CONTRACT
+Read design-handoff/epic-3/README.md and design-handoff/tokens.css. These are the visual + token contract for Epic 3 — AsteroidCard, HazardousPill, DateRangePicker, AsteroidsPanel, and the /asteroids page layout. Treat them as authoritative — globals.scss must match tokens.css, not the other way around. Use them as the spec when building KAN-7/6/8 in Step 2.
 
 STEP 1 — FETCH
 Run /atlassian:search-company-knowledge KAN-2
@@ -105,12 +111,8 @@ CONSTRAINTS
 REFERENCES
 - documents/EPIC_3_TICKETS.md — per-ticket runbook
 - documents/EPICS_E3.md — full 9-ticket spec
-- documents/CLAUDE_DESIGN_PROMPTS.md — the prompts that produced the screens you're handing off
-
-CLAUDE DESIGN HAND-OFF FOR KAN-8 (paste below this line, then send):
----
-<PASTE THE EXPORT BUNDLE FROM claude.ai/design HERE>
----
+- documents/CLAUDE_DESIGN_PROMPTS.md — the prompts that produced the screens in claude.ai/design
+- design-handoff/epic-3/ — the exported design contract (already seeded in Step 0)
 ```
 
 ---
@@ -120,15 +122,15 @@ CLAUDE DESIGN HAND-OFF FOR KAN-8 (paste below this line, then send):
 | Time | Beat | Action |
 |---|---|---|
 | Just before Prompt 1 | "Here's the spec, in Jira." | Show the KAN board on the projector — KAN-1 + 3 children, label `feza-demo`. |
-| Prompt 1 | Build Epic 2 | Paste Prompt 1. ~10 min: fetch → 3 tickets → green tests. |
-| Between prompts | Optional micro-break / Q&A bridge | Switch projector to your `claude.ai/design` tab; iterate the Asteroids landing screen once or twice live; click "Hand off to Claude Code"; copy. |
-| Prompt 2 | Build Epic 3 | Paste Prompt 2 with the hand-off bundle inserted. ~12 min: fetch → 3 tickets → green tests. |
-| After Prompt 2 | "Now ship it." | Run `git push -u origin feature/asteroids && gh pr create --fill`. Watch 4 GH workflows post checks. Address one Claude PR review comment. Merge. |
+| Prompt 1 | Build Epic 2 | Paste Prompt 1. ~10 min: seed → fetch → 3 tickets → green tests. |
+| After Prompt 1 | Push, CI, follow-up tests, merge | Per FEZA_DEMO_INSTRUCTIONS §3.5–§3.7. |
+| Prompt 2 | Build Epic 3 | Paste Prompt 2. ~12 min: seed (local design hand-off) → fetch → 3 tickets → green tests. |
+| After Prompt 2 | Push, CI, follow-up tests, merge | Per FEZA_DEMO_INSTRUCTIONS §4.5–§4.7. |
 | Closing | "And the report." | `/atlassian:generate-status-report` (optional; drop if time is tight). |
 
 ## Backup if something stalls
 
 - **Atlassian MCP fails to fetch** → read straight from `documents/EPIC_2_TICKETS.md` / `documents/EPIC_3_TICKETS.md`; the per-ticket descriptions mirror the Jira bodies.
-- **`claude.ai/design` won't open or auth lapses** → skip the live design beat; paste the relevant prompt from `documents/CLAUDE_DESIGN_PROMPTS.md` directly into Claude Code as the design brief, with a note "we'd normally do this in claude.ai/design".
+- **`claude.ai/design` won't open or auth lapses** → only affects §1.3's tab tour. Build still runs (it uses `design-handoff/` locally). Point at `design-handoff/epic-N/preview.standalone.html` in the browser as the visual reference.
 - **A ticket's `/feza-from-jira` produces wrong-shaped code** → bail out, drop to manual `/feza-route` or `/feza-component` invocation per the runbook.
 - **`make test` red** → narrate the failure, fix in front of the audience (this is good content; quality gates are entertainment, not blockers).
