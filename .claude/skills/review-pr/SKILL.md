@@ -1,9 +1,8 @@
 ---
 name: review-pr
 description: Review a pull request in this feza repo against CLAUDE.md conventions, plus general code-quality, security, and accessibility checks. Use when the user runs /review-pr or asks for a PR review by number.
-disable-model-invocation: true
 arguments: [prNumber]
-allowed-tools: Bash(gh *)
+allowed-tools: [Read, Bash(gh *)]
 ---
 
 Review pull request **#$prNumber**.
