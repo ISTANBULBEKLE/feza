@@ -190,16 +190,23 @@ gh pr create \
   --body "Built from KAN-3, KAN-4, KAN-5 via /feza-from-jira"
 ```
 
-### 3.8 — The four CI gates (expect SonarCloud red — that's the script)
+### 3.8 — The three CI gates + summon Claude on demand (expect SonarCloud red — that's the script)
 
-Four GH workflows fire in parallel:
+Three GH workflows fire automatically:
 
 | # | Workflow | Expected |
 |---|---|---|
 | 1 | `lint.yml` (ESLint flat config) | **green** |
 | 2 | `chromatic.yml` (Storybook visual baseline) | **green** |
-| 3 | `claude-pr-review.yml` (Claude posts review comments) | **green** (the action always finishes; it just reports findings) |
-| 4 | `sonarcloud.yml` (Quality Gate) | **red on "Coverage on New Code" + TODO annotations** |
+| 3 | `sonarcloud.yml` (Quality Gate) | **red on "Coverage on New Code" + TODO annotations** |
+
+Then **summon the Claude review** by posting an `@claude` PR comment — the action only fires on mention, so accidental pushes don't burn your free-tier Claude Code quota:
+
+```bash
+gh pr comment <PR_NUMBER> --body "@claude please review this PR"
+```
+
+> Narration beat: *"Claude reviews when you summon it — like a senior reviewer you @mention, not a watcher on every push."* The `claude-pr-review.yml` action runs the `/review-pr` skill once and posts findings as a single PR comment.
 
 **The Sonar red is the script.** Verbatim line for the audience:
 
@@ -323,7 +330,8 @@ gh pr create \
 |---|---|
 | `lint.yml` green | *"Skill output matches our flat config — that's CLAUDE.md memory at work."* |
 | `chromatic.yml` green | *"Storybook visual baseline accepted — the design system is stable."* |
-| `claude-pr-review.yml` posts comments | *"Same `/review-pr` skill from `.claude/skills/`, running in CI. The skill is the same file the humans use."* |
+| You post `@claude please review this PR` | *"Same `/review-pr` skill from `.claude/skills/`, running in CI on demand. The skill is the same file the humans use locally — and it only fires when summoned, so it doesn't drown the PR on every push."* |
+| `claude-pr-review.yml` posts the review comment | *"There's the review — cited file:line, flagged the TODOs, checked CLAUDE.md conventions."* |
 | `sonarcloud.yml` red on coverage | *"Quality Gate is doing its job — ≥80% coverage on new code, we scaffolded with placeholders. Follow-up commit ships the tests."* |
 | `sonarcloud.yml` red on TODOs | *"Sonar flags every `// TODO:` — those are the scaffold's `live-demo` markers. Fixed by the follow-up."* |
 
