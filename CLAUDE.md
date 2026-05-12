@@ -10,7 +10,9 @@ A small Next.js 16 App Router app — the demo for the talk *"Your AI Dev Partne
 - **Epic 2 — `/apod`** (live-coded on stage, Part 1): APOD browser. Page is a placeholder until then.
 - **Epic 3 — `/asteroids`** (live-coded on stage, Part 2): Near-Earth Objects browser, built from Confluence spec → Jira → Claude Design → Claude Code. Placeholder until then.
 
-Full design lives in `documents/PROJECT_PLAN.md`. Tickets in `documents/EPICS.md` (Epic 1 & 2) and `documents/EPICS_E3.md` (Epic 3). Part 2 narrative in `documents/PART2_PLAN.md`.
+**Finished design lives in `design-handoff/`** — it is the single source of truth for tomorrow's live demo. `design-handoff/tokens.css` is the authoritative token set; `design-handoff/epic-2/README.md` and `design-handoff/epic-3/README.md` are the Claude Code prompts for each screen; `preview.standalone.html` in each is the visual reference. Do NOT pull design from `claude.ai/design`, `documents/CLAUDE_DESIGN_PROMPTS.md`, or `documents/DESIGN_SYSTEM_TOKEN.md` during the demo — those informed the handoff and are now historical.
+
+Tickets in `documents/EPICS.md` (Epic 1 & 2) and `documents/EPICS_E3.md` (Epic 3). Part 1 narrative in `documents/FEZA_PLAN.md`; Part 2 narrative in `documents/PART2_PLAN.md`; full plan in `documents/PROJECT_PLAN.md`.
 
 ## Stack
 
@@ -21,8 +23,8 @@ Full design lives in `documents/PROJECT_PLAN.md`. Tickets in `documents/EPICS.md
 
 ## Design tooling
 
-- **`claude.ai/design` is the canonical design + prototyping tool.** Screen briefs live in `documents/CLAUDE_DESIGN_PROMPTS.md` — paste-ready prompts seeded with the feza palette and typography. The user's `feza` project at <https://claude.ai/design> holds the rendered screens.
-- **The Canva MCP is connected and usable** (already auth'd via the `claude.ai Canva` connector — visible in `claude mcp list`). It can generate marketing-style graphic mockups and manage folders. **Not preferred** for design-system work because Canva's Brand Kit feature — which is what would let `generate-design` produce on-palette mockups via `brand_kit_id` — requires a paid Canva plan. Without a Brand Kit, generated designs use stock template palettes that don't match feza tokens. Recipe for the eventual paid path lives in `documents/CANVA_BRAND_KIT.md`.
+- **`design-handoff/` is the canonical design source for the live demo.** Claude Design produced the screens; they're exported there as frozen tokens (`tokens.css`), per-epic READMEs with Claude Code prompts, and `preview.standalone.html` visual references. During the demo, Claude Code reads from `design-handoff/`, not from `claude.ai/design`.
+- **The Canva MCP is connected but not used during the demo.** Recipe for the eventual paid Brand Kit path lives in `documents/CANVA_BRAND_KIT.md`.
 - Vitest + Testing Library + jsdom
 - ESLint flat config
 - Storybook 10 (`@storybook/nextjs-vite`) for component stories
@@ -88,11 +90,12 @@ Skills live in `.claude/skills/`. Claude Code auto-discovers them — the README
 
 ## Live-demo etiquette
 
-When asked to build Epic 2 on stage:
-1. Scaffold the page + paired API route handler.
-2. Scaffold any new component (3-file pattern + a Storybook story).
-3. Reuse `<PhotoCard>` and `<PhotoGrid>` from `src/components/`.
-4. Run `make test` after each ticket — green tests are the demo's punctuation.
+When asked to build Epic 2 or Epic 3 on stage:
+1. **Read design from `design-handoff/epic-2/README.md` (or `epic-3/README.md`).** Tokens come from `design-handoff/tokens.css` only — never re-derive from `claude.ai/design` or `documents/CLAUDE_DESIGN_PROMPTS.md`.
+2. Scaffold the page + paired API route handler.
+3. Scaffold any new component (3-file pattern + a Storybook story).
+4. Reuse `<PhotoCard>` and `<PhotoGrid>` from `src/components/`.
+5. Run `make test` after each ticket — green tests are the demo's punctuation.
 
 ### Quality pass before each commit
 
@@ -101,17 +104,28 @@ When asked to build Epic 2 on stage:
 
 ## References
 
+**Design (only source for the live demo):**
+- `design-handoff/README.md` — handoff overview + token contract
+- `design-handoff/tokens.css` — authoritative tokens (color, weight, shadow)
+- `design-handoff/epic-2/README.md` — Claude Code prompt + preview for `/apod`
+- `design-handoff/epic-3/README.md` — Claude Code prompt + preview for `/asteroids`
+
+**Plan & narrative:**
 - `documents/PROJECT_PLAN.md` — full plan
 - `documents/EPICS.md` — Epic 1 & 2 ticket-by-ticket breakdown
 - `documents/EPICS_E3.md` — Epic 3 (`/asteroids`) ticket breakdown — Part 2
 - `documents/EPIC_2_TICKETS.md` — Part 1 demo runbook (KAN-1 + KAN-3/4/5)
 - `documents/EPIC_3_TICKETS.md` — Part 2 demo runbook (KAN-2 + KAN-6/7/8)
-- `documents/CLAUDE_DESIGN_PROMPTS.md` — paste-ready prompts for the claude.ai/design screens
-- `documents/DEMO_EPI2_EPI3_PROMPTS.md` — two stage prompts for the live-coded Epic 2 and Epic 3 beats (drives `/feza-from-jira KAN-3..8`)
-- `documents/INTEGRATION_STEPS_PLAN.md` — Figma + GitHub + Canva playbook
-- `documents/ATLASSIAN_SETUP.md` — Atlassian Remote MCP wiring + Jira/Confluence pre-stage — Part 2
+- `documents/DEMO_EPI2_EPI3_PROMPTS.md` — stage prompts for the live-coded beats (drives `/feza-from-jira KAN-3..8`)
 - `documents/FEZA_PLAN.md` — talk narrative (Part 1)
 - `documents/PART2_PLAN.md` — talk narrative (Part 2: Atlassian + Claude Design)
+
+**Setup / integrations:**
+- `documents/INTEGRATION_STEPS_PLAN.md` — Figma + GitHub + Canva playbook
+- `documents/ATLASSIAN_SETUP.md` — Atlassian Remote MCP wiring + Jira/Confluence pre-stage — Part 2
 - `documents/SETUP.md` — one-time SonarCloud + Chromatic wiring
-- `documents/DESIGN_SYSTEM_TOKEN.md` — design-system token reference
 - `START.md` — 60-second how-to-run
+
+**Historical (do not use during the demo — superseded by `design-handoff/`):**
+- `documents/CLAUDE_DESIGN_PROMPTS.md` — original briefs sent to claude.ai/design
+- `documents/DESIGN_SYSTEM_TOKEN.md` — pre-handoff token notes
