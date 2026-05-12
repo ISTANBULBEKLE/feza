@@ -18,6 +18,7 @@ const eslintConfig = defineConfig([
     "coverage/**",         // vitest LCOV output (consumed by Sonar)
     "storybook-static/**", // chromatic-built Storybook
     ".storybook-out/**",   // /feza-story skill verification build
+    "design-handoff/**",   // exported design contract (reference snippets, not app code)
   ]),
 ]);
 
