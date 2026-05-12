@@ -31,13 +31,17 @@ Use this lookup. Pick exactly one as the primary; subsequent steps may invoke ot
 
 If multiple apply (typical for a "page" ticket that also adds a new component), call the primary first then the secondary.
 
-## Step 3 — Branch + scaffold
+## Step 3 — Branch precondition + scaffold
 
-```bash
-git checkout -b feature/$(jira-key-to-kebab "$jiraKey")
-```
+Run `git branch --show-current` first.
 
-Run the chosen scaffold skill. After scaffolding, fill in the body following the ticket's acceptance criteria. Reuse existing components from `src/components/` (especially `<PhotoCard>`, `<PhotoGrid>`) — the talk's reuse beat depends on it.
+- If the result starts with `feature/`, **continue silently** — the caller has already set up the epic branch per the "one branch per epic" runbook convention (e.g. `feature/apod` carries KAN-3/4/5 together, then merges as a single PR).
+- Otherwise (typically `main`), **stop and tell the caller** to create the epic branch first:
+  - For Epic 2 tickets (KAN-3/4/5): `git checkout -b feature/apod`
+  - For Epic 3 tickets (KAN-6/7/8): `git checkout -b feature/asteroids`
+  - Do **not** auto-create a per-ticket branch — that fights the runbook.
+
+Once on a feature branch, run the chosen scaffold skill. After scaffolding, fill in the body following the ticket's acceptance criteria. Reuse existing components from `src/components/` (especially `<PhotoCard>`, `<PhotoGrid>`) — the talk's reuse beat depends on it.
 
 ## Step 4 — Verify
 
@@ -56,7 +60,7 @@ Output a checklist to the user:
 - [ ] Acceptance criteria covered: `<which ones, which still pending>`
 - [ ] `make test` green
 - [ ] `make build` green
-- [ ] Branch: `feature/<kebab>`
+- [ ] Branch: `<output of `git branch --show-current`>` (should be a `feature/*` branch — owned by the caller, not this skill)
 
 Do **not** push or open a PR automatically — the user runs `gh pr create` on stage as a separate beat.
 
