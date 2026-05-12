@@ -14,12 +14,12 @@ Create exactly these three files using the Write tool. Use `$Name` literally —
 import styles from "./$Name.module.scss";
 import { cx } from "@/helpers/classNames";
 
-export interface ${Name}Props {
+export interface $NameProps {
   className?: string;
   children?: React.ReactNode;
 }
 
-export function $Name({ className, children }: ${Name}Props) {
+export function $Name({ className, children }: $NameProps) {
   return (
     <div className={cx(styles.root, className)}>
       {children}
